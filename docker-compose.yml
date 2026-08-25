@@ -14,7 +14,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
 
     ports:
-      - "5432:5432"
+        - "15432:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -59,6 +59,9 @@ services:
 
       # Use Colombia timezone.
       AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
+
+      # Install the libraries used by the project ETL scripts.
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
 
       # Airflow administrator credentials.
       _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
@@ -110,10 +113,15 @@ services:
 
       AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
 
+      # Install the libraries used by the project ETL scripts.
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+      - ./.env:/opt/airflow/.env:ro
 
     ports:
       - "8080:8080"
@@ -143,13 +151,112 @@ services:
 
       AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
 
+      # Install the libraries used by the project ETL scripts.
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+      - ./.env:/opt/airflow/.env:ro
 
     command: scheduler
 
+  # ============================================================
+  # Zookeeper
+  # ============================================================
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: barca-zookeeper
+
+    environment:
+      # Unique identifier for this Zookeeper server.
+      ZOOKEEPER_SERVER_ID: 1
+
+      # Port used by Kafka to communicate with Zookeeper.
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+      # Zookeeper timing configuration.
+      ZOOKEEPER_TICK_TIME: 2000
+
+    ports:
+      - "2181:2181"
+
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ============================================================
+  # Kafka
+  # ============================================================
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: barca-kafka
+
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+
+    environment:
+
+      # Unique identifier for this Kafka broker.
+      KAFKA_BROKER_ID: 1
+
+      # Connect Kafka to Zookeeper.
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Kafka listener configuration.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      # Internal communication between Docker services.
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+
+      # Kafka's internal listener.
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+
+      # Kafka uses the internal listener for broker communication.
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # Replication factor must be 1 because we have one broker.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # Allow automatic topic creation during development.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # Reduce waiting time for a single-broker local environment.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+    ports:
+      - "9092:9092"
+
+
+  # ============================================================
+  # Kafka UI
+  # ============================================================
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: barca-kafka-ui
+
+    depends_on:
+      - kafka
+
+    environment:
+
+      # Name displayed in Kafka UI.
+      KAFKA_CLUSTERS_0_NAME: barca-kafka
+
+      # Kafka broker address from inside Docker.
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+    ports:
+      - "8081:8080"
 
 # ============================================================
 # Persistent volumes
