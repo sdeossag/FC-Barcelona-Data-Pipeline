@@ -20,9 +20,24 @@ SCRIPTS_DIR = AIRFLOW_ROOT / "scripts"
 RAW_DIR = AIRFLOW_ROOT / "data" / "raw"
 STAGING_DIR = AIRFLOW_ROOT / "data" / "staging"
 
+TABLE_NAMES = ("matches", "standings", "scorers")
+
 # Make the project scripts importable when Airflow runs inside its container.
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
+
+
+def _table_for(path: Path) -> str:
+    """Map a raw or staging filename to its destination table.
+
+    Filenames follow the pattern <competition>_<resource>_<timestamp>, so the
+    resource name identifies the table. Raising here rather than returning None
+    means an unexpected file fails the task instead of being skipped silently.
+    """
+    for table_name in TABLE_NAMES:
+        if f"_{table_name}_" in path.name:
+            return table_name
+    raise ValueError(f"Unrecognized file, cannot map it to a table: {path.name}")
 
 
 def extract_task(**context: Any) -> dict[str, Any]:
@@ -65,16 +80,14 @@ def transform_task(**context: Any) -> dict[str, Any]:
 
     parquet_files: list[str] = []
     transformed_rows = 0
+    transformers = {
+        "matches": transform_matches,
+        "standings": transform_standings,
+        "scorers": transform_scorers,
+    }
     for raw_path in extracted["files"]:
         path = Path(raw_path)
-        if "_matches_" in path.name:
-            frame = transform_matches(path, STAGING_DIR)
-        elif "_standings_" in path.name:
-            frame = transform_standings(path, STAGING_DIR)
-        elif "_scorers_" in path.name:
-            frame = transform_scorers(path, STAGING_DIR)
-        else:
-            raise ValueError(f"Unrecognized raw file: {path.name}")
+        frame = transformers[_table_for(path)](path, STAGING_DIR)
         parquet_path = STAGING_DIR / f"{path.stem}.parquet"
         parquet_files.append(str(parquet_path))
         transformed_rows += len(frame)
@@ -92,40 +105,67 @@ def load_task(**context: Any) -> dict[str, Any]:
     if not transformed or not transformed.get("files"):
         raise ValueError("No transformed files were returned by transform_task")
 
+    import pyarrow.parquet as pq
+
     loaded_rows = 0
     for parquet_path in transformed["files"]:
         path = Path(parquet_path)
-        table_name = next((table for table in ("matches", "standings", "scorers") if f"_{table}_" in path.name), None)
-        if table_name is None:
-            raise ValueError(f"Unrecognized staging file: {path.name}")
+        table_name = _table_for(path)
         if not load_to_postgres(path, table_name, "upsert"):
             raise RuntimeError(f"Load failed for {path.name}")
-        import pandas as pd
 
-        loaded_rows += len(pd.read_parquet(path))
+        # Parquet stores the row count in its footer metadata, so this reads a
+        # few bytes instead of decoding the whole file just to call len() on it.
+        loaded_rows += pq.ParquetFile(path).metadata.num_rows
 
     metrics = {"loaded_rows": loaded_rows}
     LOGGER.info("Load completed: %s", metrics)
     return metrics
 
 
-def quality_check_task(**context: Any) -> None:
-    """Re-run data-quality checks on every staging dataset before notification."""
+def validate_staging_task(**context: Any) -> None:
+    """Block the pipeline when a staging dataset is unfit to load.
+
+    This runs before load_task so bad data never reaches PostgreSQL. The same
+    validation also runs inside load_to_postgres as a library-level safety net,
+    but having it as its own task makes the gate visible in the DAG graph and
+    stops the run before a database connection is ever opened.
+    """
+    import pandas as pd
     from load import validate_quality
 
     transformed = context["ti"].xcom_pull(task_ids="transform_task")
     if not transformed or not transformed.get("files"):
         raise ValueError("No transformed files available for quality checks")
+
     for parquet_path in transformed["files"]:
         path = Path(parquet_path)
-        table_name = next((table for table in ("matches", "standings", "scorers") if f"_{table}_" in path.name), None)
-        if table_name is None:
-            raise ValueError(f"Unrecognized staging file: {path.name}")
-        import pandas as pd
-
+        table_name = _table_for(path)
         if not validate_quality(pd.read_parquet(path), table_name):
-            raise ValueError(f"Quality check failed for {path.name}")
-    LOGGER.info("All quality checks passed")
+            raise ValueError(f"Staging validation failed for {path.name}")
+    LOGGER.info("All staging datasets passed validation")
+
+
+def verify_warehouse_task(**context: Any) -> None:
+    """Assert that the warehouse is coherent after the load.
+
+    Unlike validate_staging_task, these checks query PostgreSQL itself. They
+    cover freshness, primary-key integrity and football business rules -- the
+    kind of problem that only becomes visible once rows from several runs sit
+    in the same table.
+    """
+    from load import get_connection
+    from quality import run_warehouse_checks
+
+    connection = get_connection()
+    try:
+        failures = run_warehouse_checks(connection)
+    finally:
+        connection.close()
+
+    if failures:
+        raise ValueError(f"Warehouse checks failed: {', '.join(failures)}")
+    LOGGER.info("All warehouse checks passed")
 
 
 def notification_task(**context: Any) -> None:
@@ -141,20 +181,83 @@ def notification_task(**context: Any) -> None:
     )
 
 
-default_args = {"owner": "samuel", "retries": 0}
+def alert_on_failure(context: dict[str, Any]) -> None:
+    """Emit a structured alert once a task has exhausted all of its retries.
+
+    Airflow fires on_retry_callback between attempts and this callback only when
+    the task reaches its final failed state, so the alert marks a real incident
+    rather than a transient hiccup. Logging keeps the project dependency-free;
+    swapping in Slack or email means changing only this function.
+    """
+    task_instance = context.get("task_instance")
+    LOGGER.error(
+        "PIPELINE FAILURE | dag=%s task=%s run=%s attempts=%s | %s",
+        context.get("dag").dag_id if context.get("dag") else "unknown",
+        task_instance.task_id if task_instance else "unknown",
+        context.get("run_id"),
+        task_instance.try_number - 1 if task_instance else "unknown",
+        context.get("exception"),
+    )
+
+
+default_args = {
+    "owner": "samuel",
+
+    # Three attempts total. The extract step talks to an external API over the
+    # network, which is the single most likely source of transient failure.
+    "retries": 2,
+
+    # Wait before retrying instead of hammering a service that is already
+    # struggling. Five minutes also outlasts the API's per-minute rate window.
+    "retry_delay": timedelta(minutes=5),
+
+    # Back off progressively: 5 minutes, then 10, capped by max_retry_delay.
+    "retry_exponential_backoff": True,
+    "max_retry_delay": timedelta(minutes=30),
+
+    # A hung HTTP request would otherwise hold a scheduler slot indefinitely.
+    "execution_timeout": timedelta(minutes=30),
+
+    "on_failure_callback": alert_on_failure,
+}
+
+# Retrying a data-quality failure is wasted time: the same data produces the
+# same verdict on every attempt. These two tasks fail fast and stay failed.
+QUALITY_GATE_ARGS = {"retries": 0, "retry_delay": timedelta(seconds=0)}
 
 with DAG(
     dag_id="barca_etl_pipeline",
     default_args=default_args,
     schedule="@daily",
-    start_date=datetime.now(timezone.utc) - timedelta(days=7),
+
+    # start_date must be a fixed point in time. A value derived from
+    # datetime.now() changes on every DAG parse, which happens every few
+    # seconds, leaving the scheduler unable to settle on the next run.
+    start_date=datetime(2026, 8, 1, tzinfo=timezone.utc),
+
+    # Do not backfill the runs between start_date and today.
     catchup=False,
+
+    # Prevent a slow run from overlapping with the next scheduled one and
+    # writing to the same tables concurrently.
+    max_active_runs=1,
+
+    # Cap the whole pipeline, not just individual tasks.
+    dagrun_timeout=timedelta(hours=2),
+
     tags=["barca", "football", "etl"],
 ) as dag:
     extract = PythonOperator(task_id="extract_task", python_callable=extract_task)
     transform = PythonOperator(task_id="transform_task", python_callable=transform_task)
+    validate_staging = PythonOperator(
+        task_id="validate_staging_task", python_callable=validate_staging_task, **QUALITY_GATE_ARGS
+    )
     load = PythonOperator(task_id="load_task", python_callable=load_task)
-    quality_check = PythonOperator(task_id="quality_check_task", python_callable=quality_check_task)
+    verify_warehouse = PythonOperator(
+        task_id="verify_warehouse_task", python_callable=verify_warehouse_task, **QUALITY_GATE_ARGS
+    )
     notification = PythonOperator(task_id="notification_task", python_callable=notification_task)
 
-    extract >> transform >> load >> quality_check >> notification
+    # Validation sits before the load so bad data never reaches PostgreSQL, and
+    # verification sits after it so the warehouse is checked as it actually is.
+    extract >> transform >> validate_staging >> load >> verify_warehouse >> notification
