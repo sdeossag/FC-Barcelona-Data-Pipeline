@@ -1,0 +1,35 @@
+services:
+
+  # PostgreSQL is our analytical database / data warehouse.
+  postgres:
+    image: postgres:15
+
+    # Give the container a predictable name for easier debugging.
+    container_name: barca-postgres
+
+    # Load database credentials from the .env file.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    # Expose PostgreSQL to Windows so Power BI and local tools
+    # can connect through localhost:5432.
+    ports:
+      - "5432:5432"
+
+    # Persist PostgreSQL data even if the container is recreated.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Docker will periodically check whether PostgreSQL is ready.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+
+  # Named Docker volume used to persist PostgreSQL data.
+  postgres_data:
