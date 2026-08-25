@@ -30,6 +30,12 @@ data/staging/*
 # Airflow
 # ============================================================
 
+# docker-compose mounts ./logs into the containers, so task logs are written to
+# the repository root and not under an airflow/ directory. Without this entry
+# every DAG run adds files here, and the run_id folder names contain characters
+# that Windows encodes in a way Git cannot round-trip cleanly.
+logs/
+
 airflow/logs/
 airflow/plugins/
 airflow/config/
