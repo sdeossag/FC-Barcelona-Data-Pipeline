@@ -22,27 +22,31 @@ ALLOWED_STRATEGIES = {"append", "replace", "upsert"}
 
 TABLE_DEFINITIONS = {
     "matches": {
-        "columns": ["match_id", "date", "home_team", "away_team", "home_goals", "away_goals", "status", "competition", "matchday", "season"],
+        "columns": ["match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team", "home_goals", "away_goals", "status", "competition", "matchday", "season"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS matches (
                 match_id BIGINT PRIMARY KEY,
                 date TIMESTAMPTZ NOT NULL,
+                home_team_id INTEGER NOT NULL,
                 home_team TEXT NOT NULL,
+                away_team_id INTEGER NOT NULL,
                 away_team TEXT NOT NULL,
                 home_goals INTEGER NOT NULL DEFAULT 0,
                 away_goals INTEGER NOT NULL DEFAULT 0,
                 status TEXT,
                 competition TEXT,
                 matchday INTEGER,
-                season INTEGER
+                season INTEGER,
+                loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )
         """,
         "conflict_key": "match_id",
     },
     "standings": {
-        "columns": ["position", "team_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_diff", "points", "season", "matchday"],
+        "columns": ["team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_diff", "points", "season", "matchday"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS standings (
+                team_id INTEGER NOT NULL,
                 position INTEGER NOT NULL,
                 team_name TEXT NOT NULL,
                 played INTEGER NOT NULL DEFAULT 0,
@@ -55,25 +59,29 @@ TABLE_DEFINITIONS = {
                 points INTEGER NOT NULL DEFAULT 0,
                 season INTEGER,
                 matchday INTEGER,
-                PRIMARY KEY (team_name, season, matchday)
+                loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                PRIMARY KEY (team_id, season, matchday)
             )
         """,
-        "conflict_key": "team_name, season, matchday",
+        "conflict_key": "team_id, season, matchday",
     },
     "scorers": {
-        "columns": ["player_name", "team", "goals", "assists", "penalties", "season"],
+        "columns": ["player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS scorers (
+                player_id INTEGER NOT NULL,
                 player_name TEXT NOT NULL,
+                team_id INTEGER NOT NULL,
                 team TEXT NOT NULL,
                 goals INTEGER NOT NULL DEFAULT 0,
                 assists INTEGER NOT NULL DEFAULT 0,
                 penalties INTEGER NOT NULL DEFAULT 0,
                 season INTEGER,
-                PRIMARY KEY (player_name, team, season)
+                loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                PRIMARY KEY (player_id, team_id, season)
             )
         """,
-        "conflict_key": "player_name, team, season",
+        "conflict_key": "player_id, team_id, season",
     },
 }
 
@@ -101,10 +109,12 @@ def validate_quality(df: pd.DataFrame, table_name: str) -> bool:
         LOGGER.error("Quality check failed for %s: DataFrame is empty", table_name)
         return False
 
+    # Identifier columns are critical: they form the primary keys, so a null one
+    # would either abort the insert or, worse, merge two unrelated records.
     critical_columns = {
-        "matches": ["match_id", "date", "home_team", "away_team"],
-        "standings": ["position", "team_name"],
-        "scorers": ["player_name", "team"],
+        "matches": ["match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team"],
+        "standings": ["team_id", "position", "team_name"],
+        "scorers": ["player_id", "team_id", "player_name", "team"],
     }.get(table_name, [])
     missing_columns = [column for column in critical_columns if column not in df.columns]
     if missing_columns:
@@ -136,8 +146,17 @@ def _python_value(value: Any) -> Any:
 
 
 def _ensure_table(cursor, table_name: str) -> None:
-    """Create a supported destination table if it does not exist."""
+    """Create a supported destination table and keep its audit column in place."""
     cursor.execute(TABLE_DEFINITIONS[table_name]["ddl"])
+
+    # CREATE TABLE IF NOT EXISTS is a no-op once the table exists, so tables
+    # created before loaded_at was introduced would never gain the column.
+    # This ALTER is idempotent and backfills existing rows with the current time.
+    cursor.execute(
+        sql.SQL(
+            "ALTER TABLE {table} ADD COLUMN IF NOT EXISTS loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        ).format(table=sql.Identifier(table_name))
+    )
 
 
 def _insert_rows(cursor, df: pd.DataFrame, table_name: str, strategy: str) -> None:
@@ -150,9 +169,17 @@ def _insert_rows(cursor, df: pd.DataFrame, table_name: str, strategy: str) -> No
     if strategy == "upsert":
         conflict_columns = [part.strip() for part in definition["conflict_key"].split(",")]
         update_columns = [column for column in columns if column not in conflict_columns]
+        # DEFAULT NOW() only fires on INSERT, so a row refreshed through the
+        # conflict branch would keep its original timestamp and look stale.
+        # Setting it explicitly makes loaded_at mean "last time we wrote this row".
         update_sql = sql.SQL(", ").join(
-            sql.SQL("{column} = EXCLUDED.{column}").format(column=sql.Identifier(column))
-            for column in update_columns
+            [
+                *(
+                    sql.SQL("{column} = EXCLUDED.{column}").format(column=sql.Identifier(column))
+                    for column in update_columns
+                ),
+                sql.SQL("loaded_at = NOW()"),
+            ]
         )
         statement = sql.SQL("INSERT INTO {table} ({columns}) VALUES %s ON CONFLICT ({conflict}) DO UPDATE SET {updates}").format(
             table=table,

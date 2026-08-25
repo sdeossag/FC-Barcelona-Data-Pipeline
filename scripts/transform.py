@@ -15,15 +15,23 @@ LOGGER = logging.getLogger("football_data_transformer")
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = REPOSITORY_ROOT / "data" / "staging"
 
+# Every dataset carries the numeric identifiers the API assigns, alongside the
+# human-readable names. Names are display data and the source can rename them at
+# any time; the ids are stable, so they are what the primary keys are built on.
 MATCH_COLUMNS = [
-    "match_id", "date", "home_team", "away_team", "home_goals", "away_goals",
-    "status", "competition", "matchday", "season",
+    "match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team",
+    "home_goals", "away_goals", "status", "competition", "matchday", "season",
 ]
 STANDING_COLUMNS = [
-    "position", "team_name", "played", "won", "drawn", "lost", "goals_for",
+    "team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for",
     "goals_against", "goal_diff", "points", "season", "matchday",
 ]
-SCORER_COLUMNS = ["player_name", "team", "goals", "assists", "penalties", "season"]
+SCORER_COLUMNS = ["player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"]
+
+# Columns that identify a row. They must never be filled with a default value:
+# a missing id has to drop the row, because defaulting it to 0 would make two
+# unrelated records collide on the same primary key.
+IDENTITY_COLUMNS = {"match_id", "home_team_id", "away_team_id", "team_id", "player_id"}
 
 
 def configure_logging() -> None:
@@ -77,11 +85,15 @@ def transform_matches(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
     for match in raw_rows:
         full_time = (match.get("score") or {}).get("fullTime") or {}
         season = match.get("season") or {}
+        home_team = match.get("homeTeam") or {}
+        away_team = match.get("awayTeam") or {}
         rows.append({
             "match_id": match.get("id"),
             "date": match.get("utcDate"),
-            "home_team": (match.get("homeTeam") or {}).get("name"),
-            "away_team": (match.get("awayTeam") or {}).get("name"),
+            "home_team_id": home_team.get("id"),
+            "home_team": home_team.get("name"),
+            "away_team_id": away_team.get("id"),
+            "away_team": away_team.get("name"),
             "home_goals": full_time.get("home"),
             "away_goals": full_time.get("away"),
             "status": match.get("status"),
@@ -91,10 +103,12 @@ def transform_matches(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
         })
     frame = pd.DataFrame(rows, columns=MATCH_COLUMNS)
     frame["date"] = pd.to_datetime(frame["date"], errors="coerce", utc=True)
-    for column in ["match_id", "home_goals", "away_goals", "matchday", "season"]:
+    for column in ["match_id", "home_team_id", "away_team_id", "home_goals", "away_goals", "matchday", "season"]:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
+    # An unplayed match legitimately has no score yet, so zero is the right
+    # default there. Identity columns get no such treatment.
     frame[["home_goals", "away_goals"]] = frame[["home_goals", "away_goals"]].fillna(0)
-    frame = frame.dropna(subset=["match_id", "home_team", "away_team", "date"])
+    frame = frame.dropna(subset=["match_id", "home_team_id", "away_team_id", "home_team", "away_team", "date"])
     return _save_and_log(frame, json_path, output_dir, "matches", len(raw_rows))
 
 
@@ -107,6 +121,7 @@ def transform_standings(json_path: str | Path, output_dir: str | Path = DEFAULT_
     season_info = payload.get("season") or {}
     matchday = season_info.get("currentMatchday") if isinstance(season_info, dict) else None
     rows = [{
+        "team_id": (row.get("team") or {}).get("id"),
         "position": row.get("position"),
         "team_name": (row.get("team") or {}).get("name"),
         "played": row.get("playedGames"),
@@ -124,8 +139,11 @@ def transform_standings(json_path: str | Path, output_dir: str | Path = DEFAULT_
     numeric_columns = [column for column in STANDING_COLUMNS if column != "team_name"]
     for column in numeric_columns:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
-    frame[numeric_columns] = frame[numeric_columns].fillna(0)
-    frame = frame.dropna(subset=["position", "team_name"])
+    # Filling a statistic with zero is safe; filling team_id with zero would let
+    # two different teams share a primary key, so identity columns are excluded.
+    statistic_columns = [column for column in numeric_columns if column not in IDENTITY_COLUMNS]
+    frame[statistic_columns] = frame[statistic_columns].fillna(0)
+    frame = frame.dropna(subset=["team_id", "position", "team_name"])
     return _save_and_log(frame, json_path, output_dir, "standings", len(raw_rows))
 
 
@@ -135,7 +153,9 @@ def transform_scorers(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
     raw_rows = payload.get("scorers") or []
     season = _season_from(payload)
     rows = [{
+        "player_id": (scorer.get("player") or {}).get("id"),
         "player_name": (scorer.get("player") or {}).get("name"),
+        "team_id": (scorer.get("team") or {}).get("id"),
         "team": (scorer.get("team") or {}).get("name"),
         "goals": scorer.get("goals"),
         "assists": scorer.get("assists"),
@@ -143,10 +163,10 @@ def transform_scorers(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
         "season": season,
     } for scorer in raw_rows]
     frame = pd.DataFrame(rows, columns=SCORER_COLUMNS)
-    for column in ["goals", "assists", "penalties", "season"]:
+    for column in ["player_id", "team_id", "goals", "assists", "penalties", "season"]:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
     frame[["goals", "assists", "penalties"]] = frame[["goals", "assists", "penalties"]].fillna(0)
-    frame = frame.dropna(subset=["player_name", "team"])
+    frame = frame.dropna(subset=["player_id", "team_id", "player_name", "team"])
     return _save_and_log(frame, json_path, output_dir, "scorers", len(raw_rows))
 
 
