@@ -1,3 +1,44 @@
+# ============================================================
+# Shared Airflow configuration
+# ============================================================
+# A YAML anchor (&name) defines a reusable block; services pull it in with the
+# merge key (<<: *name). The three Airflow services previously repeated the same
+# build settings, environment and volumes, so a change had to be made in three
+# places and could silently drift.
+
+x-airflow-common: &airflow-common
+
+  # Build the local image instead of installing packages at container start.
+  # Naming it explicitly means Compose builds once and all three services
+  # reuse the same image.
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: barca-airflow:2.8.4
+
+  environment: &airflow-common-env
+
+    # Run Airflow tasks locally without Celery workers.
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+    # PostgreSQL database used by Airflow for its metadata.
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+      postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+
+    # Do not load example DAGs.
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+    # Use Colombia timezone.
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
+
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./scripts:/opt/airflow/scripts
+    - ./data:/opt/airflow/data
+    - ./.env:/opt/airflow/.env:ro
+
+
 services:
 
   # ============================================================
@@ -39,7 +80,7 @@ services:
   # ============================================================
 
   airflow-init:
-    image: apache/airflow:2.8.4
+    <<: *airflow-common
     container_name: barca-airflow-init
 
     depends_on:
@@ -47,23 +88,10 @@ services:
         condition: service_healthy
 
     environment:
-      # Run Airflow tasks locally without Celery workers.
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      # Inherit the shared settings, then add the admin credentials that only
+      # this one-shot service needs.
+      <<: *airflow-common-env
 
-      # PostgreSQL database used by Airflow for its metadata.
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
-        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-
-      # Do not load example DAGs.
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-
-      # Use Colombia timezone.
-      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
-
-      # Install the libraries used by the project ETL scripts.
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
-
-      # Airflow administrator credentials.
       _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
       _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
 
@@ -78,15 +106,23 @@ services:
 
         airflow db migrate
 
-        echo "Creating Airflow administrator..."
+        # This service re-runs whenever the image or its configuration changes,
+        # so creating the administrator must be idempotent. Without the guard,
+        # a duplicate-user error would abort the script under "set -e" and the
+        # webserver and scheduler would never start.
+        if airflow users list | grep -qw "$${_AIRFLOW_WWW_USER_USERNAME}"; then
+          echo "Airflow administrator already exists; skipping creation."
+        else
+          echo "Creating Airflow administrator..."
 
-        airflow users create \
-          --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
-          --password "$${_AIRFLOW_WWW_USER_PASSWORD}" \
-          --firstname Data \
-          --lastname Engineer \
-          --role Admin \
-          --email admin@barca-pipeline.local
+          airflow users create \
+            --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
+            --password "$${_AIRFLOW_WWW_USER_PASSWORD}" \
+            --firstname Data \
+            --lastname Engineer \
+            --role Admin \
+            --email admin@barca-pipeline.local
+        fi
 
         echo "Airflow initialization completed."
 
@@ -96,32 +132,12 @@ services:
   # ============================================================
 
   airflow-webserver:
-    image: apache/airflow:2.8.4
+    <<: *airflow-common
     container_name: barca-airflow-webserver
 
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
-        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-
-      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
-
-      # Install the libraries used by the project ETL scripts.
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
-
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./scripts:/opt/airflow/scripts
-      - ./data:/opt/airflow/data
-      - ./.env:/opt/airflow/.env:ro
 
     ports:
       - "8080:8080"
@@ -134,34 +150,15 @@ services:
   # ============================================================
 
   airflow-scheduler:
-    image: apache/airflow:2.8.4
+    <<: *airflow-common
     container_name: barca-airflow-scheduler
 
     depends_on:
       airflow-init:
         condition: service_completed_successfully
 
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
-        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-
-      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
-
-      # Install the libraries used by the project ETL scripts.
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas pyarrow python-dotenv"
-
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./scripts:/opt/airflow/scripts
-      - ./data:/opt/airflow/data
-      - ./.env:/opt/airflow/.env:ro
-
     command: scheduler
+
 
   # ============================================================
   # Zookeeper

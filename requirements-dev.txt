@@ -1,0 +1,16 @@
+# ============================================================
+# Local development dependencies
+# ============================================================
+# Installs everything the Airflow image has, plus the packages that only run
+# outside it: the Kafka streaming layer and the test/lint tooling.
+#
+# Recommended setup on Windows:
+#   python -m venv .venv
+#   .venv\Scripts\activate
+#   pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+kafka-python==2.3.1      # Kafka producer/consumer in streaming/
+pytest==8.4.2            # Test runner for tests/
+ruff==0.14.4             # Linter and formatter, also enforced in CI

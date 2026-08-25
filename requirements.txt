@@ -1,0 +1,11 @@
+# ============================================================
+# Runtime dependencies for the ETL scripts executed by Airflow
+# ============================================================
+# These versions come from the Airflow 2.8.4 / Python 3.11 constraints file,
+# which the Dockerfile also passes to pip. Keeping them aligned means a build
+# today and a build in six months produce the same image.
+
+pandas==2.1.4            # DataFrame transforms in scripts/transform.py
+pyarrow==14.0.2          # Parquet engine used by pandas .to_parquet/.read_parquet
+psycopg2-binary==2.9.9   # PostgreSQL driver used by scripts/load.py
+python-dotenv==1.0.1     # Reads .env inside the container

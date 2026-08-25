@@ -1,0 +1,22 @@
+# Everything in this file is excluded from the build context sent to Docker.
+# Without it, Docker uploads data/, logs/ and .git on every build, which is slow
+# and risks baking local data or secrets into an image layer.
+
+.git
+.github
+.venv
+venv
+env
+
+data/
+logs/
+powerbi/
+
+__pycache__/
+*.py[cod]
+
+.env
+*.pbix
+
+.vscode/
+.idea/
