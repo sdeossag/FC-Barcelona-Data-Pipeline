@@ -1,35 +1,161 @@
 services:
 
-  # PostgreSQL is our analytical database / data warehouse.
+  # ============================================================
+  # PostgreSQL
+  # ============================================================
+
   postgres:
     image: postgres:15
-
-    # Give the container a predictable name for easier debugging.
     container_name: barca-postgres
 
-    # Load database credentials from the .env file.
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
 
-    # Expose PostgreSQL to Windows so Power BI and local tools
-    # can connect through localhost:5432.
     ports:
       - "5432:5432"
 
-    # Persist PostgreSQL data even if the container is recreated.
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-    # Docker will periodically check whether PostgreSQL is ready.
+      # Creates the Airflow metadata database during
+      # PostgreSQL's first initialization.
+      - ./sql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
 
+
+  # ============================================================
+  # Airflow initialization
+  # ============================================================
+
+  airflow-init:
+    image: apache/airflow:2.8.4
+    container_name: barca-airflow-init
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      # Run Airflow tasks locally without Celery workers.
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      # PostgreSQL database used by Airflow for its metadata.
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+
+      # Do not load example DAGs.
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      # Use Colombia timezone.
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
+
+      # Airflow administrator credentials.
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
+
+    entrypoint: /bin/bash
+
+    command:
+      - -c
+      - |
+        set -e
+
+        echo "Initializing Airflow database..."
+
+        airflow db migrate
+
+        echo "Creating Airflow administrator..."
+
+        airflow users create \
+          --username "$${_AIRFLOW_WWW_USER_USERNAME}" \
+          --password "$${_AIRFLOW_WWW_USER_PASSWORD}" \
+          --firstname Data \
+          --lastname Engineer \
+          --role Admin \
+          --email admin@barca-pipeline.local
+
+        echo "Airflow initialization completed."
+
+
+  # ============================================================
+  # Airflow Webserver
+  # ============================================================
+
+  airflow-webserver:
+    image: apache/airflow:2.8.4
+    container_name: barca-airflow-webserver
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
+
+    ports:
+      - "8080:8080"
+
+    command: webserver
+
+
+  # ============================================================
+  # Airflow Scheduler
+  # ============================================================
+
+  airflow-scheduler:
+    image: apache/airflow:2.8.4
+    container_name: barca-airflow-scheduler
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+        postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: America/Bogota
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
+
+    command: scheduler
+
+
+# ============================================================
+# Persistent volumes
+# ============================================================
+
 volumes:
 
-  # Named Docker volume used to persist PostgreSQL data.
+  # Keeps PostgreSQL data when the container is recreated.
   postgres_data:
