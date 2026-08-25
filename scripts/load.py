@@ -4,25 +4,26 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
-import re
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import psycopg2
-from dotenv import load_dotenv
 from psycopg2 import sql
 from psycopg2.extras import execute_values
+
+# Connection handling lives in db.py so the streaming services can reuse it
+# without pulling in pandas. Re-exported here because every existing caller
+# imports it from this module.
+from db import DEFAULT_SCHEMA, get_connection, get_schema
 
 
 LOGGER = logging.getLogger("football_data_loader")
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-# The warehouse lives in its own schema rather than in public, so analytics
-# tables are separated from anything else the database may hold.
-DEFAULT_SCHEMA = "warehouse"
 ALLOWED_TABLES = {"matches", "standings", "scorers"}
 ALLOWED_STRATEGIES = {"append", "replace", "upsert"}
+
+__all__ = ["DEFAULT_SCHEMA", "get_connection", "get_schema", "load_to_postgres", "validate_quality"]
 
 TABLE_DEFINITIONS = {
     "matches": {
@@ -93,42 +94,6 @@ TABLE_DEFINITIONS = {
 def configure_logging() -> None:
     """Configure logs for command-line and Airflow execution."""
     logging.basicConfig(level="INFO", format="%(asctime)s %(levelname)s %(name)s - %(message)s")
-
-
-def get_schema() -> str:
-    """Return the warehouse schema name, validated for safe interpolation.
-
-    The name is injected into a libpq connection option rather than passed as a
-    query parameter, because search_path cannot be parameterized. Restricting it
-    to identifier characters keeps a malformed .env from smuggling extra
-    connection options through that string.
-    """
-    schema = os.getenv("POSTGRES_SCHEMA", DEFAULT_SCHEMA)
-    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", schema):
-        raise ValueError(f"Invalid POSTGRES_SCHEMA value: {schema!r}")
-    return schema
-
-
-def get_connection():
-    """Open a PostgreSQL connection scoped to the warehouse schema.
-
-    Setting search_path on the connection means every statement in the project
-    resolves to the configured schema without repeating it in each query. All
-    other modules import this function, so the schema is defined in one place.
-
-    public is deliberately excluded from the path: if a table is missing from
-    the warehouse schema, the query should fail loudly rather than quietly read
-    a leftover copy left behind in public.
-    """
-    load_dotenv(REPOSITORY_ROOT / ".env")
-    return psycopg2.connect(
-        host=os.getenv("POSTGRES_HOST", "localhost"),
-        port=os.getenv("POSTGRES_PORT", "5432"),
-        dbname=os.getenv("POSTGRES_DB", "barca_warehouse"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD"),
-        options=f"-c search_path={get_schema()}",
-    )
 
 
 def validate_quality(df: pd.DataFrame, table_name: str) -> bool:

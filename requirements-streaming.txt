@@ -1,0 +1,11 @@
+# ============================================================
+# Dependencies for the Kafka streaming services
+# ============================================================
+# Deliberately smaller than requirements.txt: the producer reads JSON from the
+# StatsBomb open data set and the consumer writes rows to PostgreSQL, so neither
+# needs pandas or pyarrow. Connection handling lives in scripts/db.py precisely
+# so this image can stay lean.
+
+kafka-python==2.3.1      # Kafka client for producer and consumer
+psycopg2-binary==2.9.9   # PostgreSQL driver used by scripts/db.py
+python-dotenv==1.0.1     # Reads .env inside the container

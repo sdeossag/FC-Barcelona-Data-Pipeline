@@ -255,6 +255,88 @@ services:
     ports:
       - "8081:8080"
 
+  # ============================================================
+  # Streaming: Kafka consumer
+  # ============================================================
+
+  consumer:
+    build:
+      context: .
+      dockerfile: streaming/Dockerfile
+    image: barca-streaming:1.0
+    container_name: barca-consumer
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+    environment:
+      # Service names on the compose network, which is what .env already holds.
+      # Running these scripts from the host instead would need localhost:15432
+      # and localhost:9092, because those are the published ports.
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-warehouse}
+
+    volumes:
+      - ./streaming:/app/streaming:ro
+      - ./scripts:/app/scripts:ro
+      - ./data:/app/data
+
+    # The consumer is a long-running service: restart it if it dies, but not
+    # when it was stopped on purpose.
+    restart: unless-stopped
+
+    command: python streaming/consumer.py
+
+
+  # ============================================================
+  # Streaming: Kafka producer (match replay)
+  # ============================================================
+  # Started on demand rather than with the stack, because a replay is a finite
+  # job and not a service:
+  #   docker compose run --rm producer --list-matches
+  #   docker compose run --rm producer --match-id 3773565 --speed 60
+
+  producer:
+    build:
+      context: .
+      dockerfile: streaming/Dockerfile
+    image: barca-streaming:1.0
+    container_name: barca-producer
+
+    depends_on:
+      kafka:
+        condition: service_started
+
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-warehouse}
+
+    volumes:
+      - ./streaming:/app/streaming:ro
+      - ./scripts:/app/scripts:ro
+      # Writable: StatsBomb event files are cached here on first download.
+      - ./data:/app/data
+
+    # Never start with "docker compose up": this profile keeps it out of the
+    # default set so it only runs when invoked explicitly.
+    profiles: ["manual"]
+
+    entrypoint: ["python", "streaming/producer.py"]
+
+
 # ============================================================
 # Persistent volumes
 # ============================================================

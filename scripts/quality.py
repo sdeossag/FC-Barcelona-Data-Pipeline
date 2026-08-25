@@ -151,7 +151,7 @@ def main() -> int:
     """Run the checks from the command line for manual verification."""
     logging.basicConfig(level="INFO", format="%(asctime)s %(levelname)s %(name)s - %(message)s")
 
-    from load import get_connection
+    from db import get_connection
 
     connection = get_connection()
     try:
