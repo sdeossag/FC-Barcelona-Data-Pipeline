@@ -13,6 +13,7 @@ from typing import Any
 from dotenv import load_dotenv
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
+from psycopg2 import sql as psycopg2_sql
 
 
 LOGGER = logging.getLogger("barca_event_consumer")
@@ -40,11 +41,23 @@ def get_connection():
 
 
 def ensure_table() -> None:
-    """Create the live event table if it does not exist."""
+    """Create the warehouse schema and the live event table if they do not exist."""
+    sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
+    from load import get_schema
+
     connection = get_connection()
     try:
         with connection:
             with connection.cursor() as cursor:
+                # The connection's search_path points at the warehouse schema, so
+                # an unqualified CREATE TABLE fails outright when that schema does
+                # not exist yet. This makes the consumer safe to run first on a
+                # fresh clone, before the batch pipeline has created anything.
+                cursor.execute(
+                    psycopg2_sql.SQL("CREATE SCHEMA IF NOT EXISTS {schema}").format(
+                        schema=psycopg2_sql.Identifier(get_schema())
+                    )
+                )
                 cursor.execute(
                     """
                     CREATE TABLE IF NOT EXISTS live_events (
