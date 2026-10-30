@@ -146,10 +146,24 @@ def _run_simulation(competition: str) -> dict[str, float]:
 
         predict.save_title_probabilities(connection, teams, competition, SIMULATIONS, version, notes)
 
+        # The per-fixture probabilities behind the simulation were previously
+        # discarded. Persisting them lets the report show what the model expects
+        # from the next match, not only the season-level outcome.
+        model_name, metadata = predict.active_model()
+        model_version = predict.register_model(connection, model_name, metadata)
+        stored = predict.save_fixture_predictions(
+            connection, model, feature_columns, competition, model_version
+        )
+
         barca = teams[teams["team_id"] == predict.BARCELONA_TEAM_ID]["title_probability"]
         probability = float(barca.iloc[0]) if len(barca) else 0.0
-        LOGGER.info("%s: Barcelona title probability %.1f%%", competition, probability * 100)
-        return {"competition": competition, "barca_title_probability": probability}
+        LOGGER.info("%s: Barcelona title probability %.1f%%, %d fixture prediction(s) stored",
+                    competition, probability * 100, stored)
+        return {
+            "competition": competition,
+            "barca_title_probability": probability,
+            "fixture_predictions": stored,
+        }
     finally:
         connection.close()
 

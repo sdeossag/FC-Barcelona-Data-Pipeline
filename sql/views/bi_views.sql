@@ -429,3 +429,404 @@ SELECT
 FROM warehouse.vw_team_match_results
 WHERE is_group_stage
 GROUP BY comp_season_key, competition, season, team_id, team_name;
+
+-- ============================================================
+-- DASHBOARD REDESIGN - reporting layer for the new pages
+-- ============================================================
+-- Everything below is additive. The views the original report uses are left
+-- untouched, so a stale .pbix keeps refreshing while the new pages are built.
+-- Apply this file after migration 007.
+
+
+-- ------------------------------------------------------------
+-- Date dimension
+-- ------------------------------------------------------------
+-- Power BI needs a contiguous table to mark as a date table and to drive
+-- time intelligence. A view is preferable to a calculated table here: the
+-- grain is explicit and reviewable, and every report that points at the
+-- warehouse gets the same calendar.
+CREATE OR REPLACE VIEW warehouse.vw_dim_date AS
+SELECT
+    d::date AS date,
+    EXTRACT(YEAR FROM d)::int    AS year,
+    EXTRACT(MONTH FROM d)::int   AS month,
+    CASE EXTRACT(MONTH FROM d)::int
+        WHEN 1 THEN 'Enero'    WHEN 2 THEN 'Febrero'  WHEN 3 THEN 'Marzo'
+        WHEN 4 THEN 'Abril'    WHEN 5 THEN 'Mayo'     WHEN 6 THEN 'Junio'
+        WHEN 7 THEN 'Julio'    WHEN 8 THEN 'Agosto'   WHEN 9 THEN 'Septiembre'
+        WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre'
+    END AS month_name,
+    EXTRACT(QUARTER FROM d)::int AS quarter,
+    TO_CHAR(d, 'YYYY-MM')        AS year_month,
+    EXTRACT(ISOYEAR FROM d)::int AS iso_year,
+    EXTRACT(WEEK FROM d)::int    AS iso_week,
+    EXTRACT(DOW FROM d)::int     AS day_of_week,
+    CASE EXTRACT(DOW FROM d)::int
+        WHEN 0 THEN 'Domingo' WHEN 1 THEN 'Lunes'   WHEN 2 THEN 'Martes'
+        WHEN 3 THEN 'Miércoles' WHEN 4 THEN 'Jueves' WHEN 5 THEN 'Viernes'
+        WHEN 6 THEN 'Sábado'
+    END AS day_name,
+    EXTRACT(DOW FROM d)::int IN (0, 6) AS is_weekend
+FROM generate_series('2022-01-01'::date, '2027-12-31'::date, '1 day'::interval) AS d;
+
+
+-- ------------------------------------------------------------
+-- Barcelona fixtures, from Barcelona's point of view
+-- ------------------------------------------------------------
+-- vw_team_match_results already unfolds the fixture into two rows. This view
+-- narrows it to Barcelona and adds the display columns a table visual needs:
+-- a scoreline as text, a one-letter result and a venue label.
+CREATE OR REPLACE VIEW warehouse.vw_barca_matches AS
+SELECT
+    match_id,
+    comp_season_key,
+    competition,
+    season,
+    stage,
+    is_group_stage,
+    matchday,
+    date,
+    opponent_id,
+    opponent_name,
+    is_home,
+    CASE WHEN is_home THEN 'Casa' ELSE 'Fuera' END AS venue,
+    goals_for,
+    goals_against,
+    goals_for - goals_against AS goal_difference,
+    goals_for || ' - ' || goals_against AS scoreline,
+    result,
+    CASE result WHEN 'WIN' THEN 'V' WHEN 'DRAW' THEN 'E' ELSE 'D' END AS result_code,
+    points
+FROM warehouse.vw_team_match_results
+WHERE team_id = 81;
+
+
+-- ------------------------------------------------------------
+-- Last five matches, per competition and season
+-- ------------------------------------------------------------
+-- The row number is kept in the view so the report can sort by recency
+-- without hard-coding a date. Partitioning by comp_season_key means the
+-- "last five" is correct after a competition or season slicer is applied.
+CREATE OR REPLACE VIEW warehouse.vw_barca_form_last5 AS
+SELECT *
+FROM (
+    SELECT
+        m.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY comp_season_key
+            ORDER BY date DESC, matchday DESC
+        ) AS recency
+    FROM warehouse.vw_barca_matches m
+) ranked
+WHERE recency <= 5;
+
+
+-- ------------------------------------------------------------
+-- Home vs away split
+-- ------------------------------------------------------------
+-- Two rows per competition and season: one for each venue. Rates are stored
+-- as decimals (0.88, not 88) so Power BI can format them as percentages
+-- without a second calculation.
+CREATE OR REPLACE VIEW warehouse.vw_barca_home_away AS
+SELECT
+    comp_season_key,
+    competition,
+    season,
+    CASE WHEN is_home THEN 'Casa' ELSE 'Fuera' END AS venue,
+    COUNT(*)                                    AS matches_played,
+    COUNT(*) FILTER (WHERE result = 'WIN')       AS wins,
+    COUNT(*) FILTER (WHERE result = 'DRAW')      AS draws,
+    COUNT(*) FILTER (WHERE result = 'LOSS')      AS losses,
+    SUM(goals_for)                               AS goals_for,
+    SUM(goals_against)                           AS goals_against,
+    ROUND(AVG(goals_for), 2)                     AS goals_for_per_match,
+    ROUND(AVG(goals_against), 2)                 AS goals_against_per_match,
+    ROUND(
+        COUNT(*) FILTER (WHERE result = 'WIN')::numeric / NULLIF(COUNT(*), 0),
+        3
+    ) AS win_rate,
+    SUM(points)                                  AS points
+FROM warehouse.vw_barca_matches
+GROUP BY comp_season_key, competition, season, is_home;
+
+
+-- ------------------------------------------------------------
+-- Shot quality per player
+-- ------------------------------------------------------------
+-- vw_shot_quality keeps one row per shot. This aggregates to the player grain
+-- the scatter and the efficiency table need. xG is summed, not averaged: a
+-- player with twenty shots at 0.1 xG each has generated two expected goals.
+CREATE OR REPLACE VIEW warehouse.vw_player_shot_quality AS
+SELECT
+    player_name,
+    team_name,
+    COUNT(*)                       AS shots,
+    COUNT(*) FILTER (WHERE scored) AS goals,
+    SUM(expected_goals)            AS expected_goals,
+    SUM(goals_scored)              AS goals_scored,
+    SUM(xg_difference)             AS xg_difference,
+    ROUND(SUM(goals_scored)::numeric / NULLIF(SUM(expected_goals), 0), 3) AS conversion_ratio,
+    ROUND(SUM(expected_goals)::numeric / NULLIF(COUNT(*), 0), 3)         AS xg_per_shot
+FROM warehouse.vw_shot_quality
+WHERE player_name IS NOT NULL
+GROUP BY player_name, team_name;
+
+
+-- ------------------------------------------------------------
+-- Latest fixture predictions
+-- ------------------------------------------------------------
+-- DISTINCT ON keeps the most recent prediction for each match while leaving
+-- the history in the table for a movement chart later.
+CREATE OR REPLACE VIEW warehouse.vw_latest_match_predictions AS
+SELECT DISTINCT ON (match_id)
+    match_id,
+    competition,
+    season,
+    match_date,
+    home_team_id,
+    home_team,
+    away_team_id,
+    away_team,
+    prob_home,
+    prob_draw,
+    prob_away,
+    predicted_outcome,
+    CASE predicted_outcome
+        WHEN 'H' THEN home_team
+        WHEN 'A' THEN away_team
+        ELSE 'Empate'
+    END AS predicted_label,
+    confidence,
+    model_version,
+    predicted_at
+FROM warehouse.match_predictions
+ORDER BY match_id, predicted_at DESC;
+
+
+-- ------------------------------------------------------------
+-- Barcelona's next fixtures
+-- ------------------------------------------------------------
+-- Only unplayed fixtures are exposed. Once a match finishes it belongs in
+-- the results table, not in "next matches"; leaving it here would make the
+-- model look clairvoyant after the fact.
+CREATE OR REPLACE VIEW warehouse.vw_barca_fixtures AS
+SELECT
+    p.*,
+    p.competition || '-' || p.season AS comp_season_key,
+    p.home_team_id = 81 AS is_barca_home,
+    CASE WHEN p.home_team_id = 81 THEN p.away_team ELSE p.home_team END AS opponent,
+    CASE WHEN p.home_team_id = 81 THEN 'Casa' ELSE 'Fuera' END AS venue,
+    p.match_date::date - CURRENT_DATE AS days_until
+FROM warehouse.vw_latest_match_predictions p
+JOIN warehouse.matches m ON m.match_id = p.match_id
+WHERE 81 IN (p.home_team_id, p.away_team_id)
+  AND m.status <> 'FINISHED'
+  AND p.match_date >= CURRENT_DATE;
+
+
+-- ------------------------------------------------------------
+-- Model evaluation
+-- ------------------------------------------------------------
+-- The latest registered row per model, with the comparison to the baseline
+-- already calculated. A reader should not have to subtract two percentages
+-- in their head to see whether the model is worth using.
+CREATE OR REPLACE VIEW warehouse.vw_model_metrics AS
+SELECT DISTINCT ON (model_name)
+    model_name,
+    version,
+    algorithm,
+    scope,
+    trained_at,
+    evaluated_season,
+    accuracy,
+    baseline_accuracy,
+    accuracy - baseline_accuracy AS accuracy_lift,
+    log_loss,
+    baseline_log_loss,
+    brier_home,
+    features_used,
+    metadata,
+    notes,
+    registered_at,
+    (accuracy - baseline_accuracy) > 0 AS beats_baseline
+FROM warehouse.model_registry
+ORDER BY model_name, registered_at DESC;
+
+
+-- ------------------------------------------------------------
+-- Quality checks: latest run and its summary
+-- ------------------------------------------------------------
+CREATE OR REPLACE VIEW warehouse.vw_quality_results_latest AS
+WITH latest AS (
+    SELECT run_id
+    FROM warehouse.quality_check_results
+    ORDER BY checked_at DESC
+    LIMIT 1
+)
+SELECT q.run_id, q.check_name, q.passed, q.observed_value, q.expectation, q.checked_at
+FROM warehouse.quality_check_results q
+JOIN latest USING (run_id);
+
+CREATE OR REPLACE VIEW warehouse.vw_quality_summary AS
+SELECT
+    run_id,
+    MIN(checked_at) AS checked_at,
+    COUNT(*)        AS checks_total,
+    COUNT(*) FILTER (WHERE passed)     AS checks_passed,
+    COUNT(*) FILTER (WHERE NOT passed) AS checks_failed,
+    ROUND(
+        COUNT(*) FILTER (WHERE passed)::numeric / NULLIF(COUNT(*), 0),
+        3
+    ) AS pass_rate
+FROM warehouse.quality_check_results
+GROUP BY run_id;
+
+
+-- ------------------------------------------------------------
+-- Pipeline health
+-- ------------------------------------------------------------
+-- One row per persisted table, with the exact count and the age of its newest
+-- write. Counting every table is cheap at this scale and avoids the estimates
+-- in pg_stat_user_tables, which can lag behind the last load.
+CREATE OR REPLACE VIEW warehouse.vw_pipeline_health AS
+WITH health AS (
+    SELECT 'matches' AS table_name, 'Airflow - batch' AS source,
+           COUNT(*)::bigint AS row_count, MAX(loaded_at) AS last_write, 30 AS threshold_hours
+    FROM warehouse.matches
+    UNION ALL
+    SELECT 'standings', 'Airflow - batch', COUNT(*)::bigint, MAX(loaded_at), 30
+    FROM warehouse.standings
+    UNION ALL
+    SELECT 'scorers', 'Airflow - batch', COUNT(*)::bigint, MAX(loaded_at), 30
+    FROM warehouse.scorers
+    UNION ALL
+    SELECT 'live_events', 'Kafka - streaming', COUNT(*)::bigint, MAX(ingested_at), 30
+    FROM warehouse.live_events
+    UNION ALL
+    SELECT 'ml_features', 'Prediction - batch', COUNT(*)::bigint, MAX(computed_at), 30
+    FROM warehouse.ml_features
+    UNION ALL
+    SELECT 'title_probabilities', 'Prediction - weekly', COUNT(*)::bigint, MAX(calculated_at), 24 * 8
+    FROM warehouse.title_probabilities
+    UNION ALL
+    SELECT 'player_projections', 'Prediction - weekly', COUNT(*)::bigint, MAX(calculated_at), 24 * 8
+    FROM warehouse.player_projections
+    UNION ALL
+    SELECT 'match_predictions', 'Prediction - weekly', COUNT(*)::bigint, MAX(predicted_at), 24 * 8
+    FROM warehouse.match_predictions
+    UNION ALL
+    SELECT 'quality_check_results', 'Data quality', COUNT(*)::bigint, MAX(checked_at), 30
+    FROM warehouse.quality_check_results
+)
+SELECT
+    table_name,
+    source,
+    row_count,
+    last_write,
+    ROUND(EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0, 1) AS age_hours,
+    CASE
+        WHEN last_write IS NULL THEN FALSE
+        ELSE EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0 <= threshold_hours
+    END AS is_fresh,
+    threshold_hours
+FROM health;
+
+
+-- ------------------------------------------------------------
+-- Title race
+-- ------------------------------------------------------------
+-- Cumulative points for the six best sides of the selected competition and
+-- season. The rank comes from the season summary, not from the current
+-- standings snapshot, so the set of "direct rivals" stays stable across
+-- matchdays and a line does not appear halfway through the chart.
+CREATE OR REPLACE VIEW warehouse.vw_title_race AS
+WITH rivals AS (
+    SELECT
+        comp_season_key,
+        team_id,
+        RANK() OVER (
+            PARTITION BY comp_season_key
+            ORDER BY points DESC, goal_difference DESC, goals_for DESC
+        ) AS rival_rank
+    FROM warehouse.vw_team_season_summary
+)
+SELECT
+    p.comp_season_key,
+    p.competition,
+    p.season,
+    p.stage,
+    p.is_group_stage,
+    p.team_id,
+    p.team_name,
+    p.matchday,
+    p.matchday_points,
+    p.goals_for,
+    p.cumulative_points,
+    p.team_id = 81 AS is_barca,
+    COALESCE(r.rival_rank, 99) AS rival_rank,
+    COALESCE(r.rival_rank, 99) <= 6 AS is_direct_rival
+FROM warehouse.vw_points_by_matchday p
+LEFT JOIN rivals r
+       ON r.comp_season_key = p.comp_season_key
+      AND r.team_id = p.team_id;
+
+
+-- ------------------------------------------------------------
+-- Title probability over time
+-- ------------------------------------------------------------
+-- One point per team per day, even if the weekly DAG ran twice. Keeping the
+-- last run of the day avoids a zig-zag caused by two simulations on the same
+-- date, which is noise rather than movement.
+CREATE OR REPLACE VIEW warehouse.vw_title_probability_history AS
+WITH daily AS (
+    SELECT DISTINCT ON (competition, season, team_id, calculated_at::date)
+        competition,
+        season,
+        team_id,
+        team_name,
+        calculated_at::date AS calculated_date,
+        title_probability,
+        simulations_used,
+        model_version,
+        matches_played
+    FROM warehouse.title_probabilities
+    ORDER BY competition, season, team_id, calculated_at::date, calculated_at DESC
+)
+SELECT
+    d.*,
+    d.team_id = 81 AS is_barca,
+    RANK() OVER (
+        PARTITION BY competition, season, calculated_date
+        ORDER BY title_probability DESC
+    ) AS probability_rank
+FROM daily d;
+
+
+-- ------------------------------------------------------------
+-- Live match selection
+-- ------------------------------------------------------------
+-- The live page shows one match: the one whose events arrived most recently.
+-- Selecting it in SQL keeps the report from needing a "latest" measure on
+-- every visual and makes the page work with an empty or multi-match table.
+CREATE OR REPLACE VIEW warehouse.vw_live_current_match AS
+SELECT
+    match_id,
+    MIN(event_ts)    AS first_event,
+    MAX(event_ts)    AS last_event,
+    MAX(ingested_at) AS last_ingested,
+    COUNT(*)         AS events,
+    MAX(minute)      AS last_minute
+FROM warehouse.live_events
+GROUP BY match_id
+ORDER BY MAX(ingested_at) DESC
+LIMIT 1;
+
+CREATE OR REPLACE VIEW warehouse.vw_live_events_current AS
+SELECT e.*
+FROM warehouse.vw_live_events e
+JOIN warehouse.vw_live_current_match c USING (match_id);
+
+CREATE OR REPLACE VIEW warehouse.vw_live_current_score AS
+SELECT s.*, s.team_name = 'Barcelona' AS is_barca
+FROM warehouse.vw_live_score s
+JOIN warehouse.vw_live_current_match c USING (match_id);

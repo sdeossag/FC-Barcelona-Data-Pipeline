@@ -202,23 +202,43 @@ def simulate_legs(
 # Fixture probabilities
 # ============================================================
 
-def load_model() -> tuple[Any, list[str]]:
-    """Load the production model and the exact column order it expects."""
+def active_model() -> tuple[str, dict[str, Any]]:
+    """Return the production model's name and the metadata written beside it.
+
+    The name and the evaluation live in the metadata file; reading them from
+    there rather than hard-coding them keeps a retrained model from being
+    reported under the previous version's numbers.
+    """
     for name in ("match_outcome_lr_v1", "match_outcome_xgb_v1"):
         model_path = MODELS_DIR / f"{name}.pkl"
         if model_path.is_file():
             metadata = json.loads((MODELS_DIR / f"{name}_metadata.json").read_text(encoding="utf-8"))
-            LOGGER.info("Using model %s (%s)", name, metadata.get("algorithm", "unknown"))
-            return joblib.load(model_path), metadata["features_used"]
+            return name, metadata
     raise FileNotFoundError("No trained model found. Run scripts/train_model.py first.")
 
 
+def load_model() -> tuple[Any, list[str]]:
+    """Load the production model and the exact column order it expects."""
+    name, metadata = active_model()
+    LOGGER.info("Using model %s (%s)", name, metadata.get("algorithm", "unknown"))
+    return joblib.load(MODELS_DIR / f"{name}.pkl"), metadata["features_used"]
+
+
 def load_pending_fixtures(connection, competition: str) -> pd.DataFrame:
-    """Read every unplayed fixture of the target season, with its features."""
+    """Read every unplayed fixture of the target season, with its features.
+
+    match_date and the team names are selected alongside the model features so
+    the same frame can be both scored and written to match_predictions without
+    a second query.
+    """
     query = tm.SELECT_FEATURES.replace(
         "WHERE result IS NOT NULL",
         "WHERE result IS NULL AND competition = %s AND season = %s",
-    ).replace("SELECT season,", "SELECT match_id, home_team_id, away_team_id, competition_phase AS phase, season,")
+    ).replace(
+        "SELECT season,",
+        "SELECT match_id, home_team_id, home_team, away_team_id, away_team, "
+        "match_date, competition_phase AS phase, season,",
+    )
     with connection.cursor() as cursor:
         cursor.execute(query, (competition, TARGET_SEASON))
         columns = [description[0] for description in cursor.description]
@@ -493,6 +513,131 @@ def save_title_probabilities(connection, teams: pd.DataFrame, competition: str,
             execute_values(cursor, statement, values, page_size=200)
 
 
+def register_model(connection, model_name: str | None = None,
+                   metadata: dict[str, Any] | None = None) -> str:
+    """Mirror the model metadata into model_registry and return its version.
+
+    Power BI reads tables, not a JSON file next to a pickle, so the evaluation
+    that justifies the model has to live in the warehouse. The metadata document
+    is stored whole alongside the typed columns, which lets a later report read
+    a metric this migration did not anticipate.
+    """
+    if model_name is None or metadata is None:
+        model_name, metadata = active_model()
+
+    evaluation = metadata.get("evaluation", {})
+    scores = evaluation.get(metadata.get("algorithm", ""), {})
+    baseline = evaluation.get("baseline (always home)", {})
+    version = str(metadata.get("model_version") or "1.0")
+
+    statement = """
+        INSERT INTO model_registry (
+            model_name, version, algorithm, scope, trained_at, evaluated_season,
+            accuracy, baseline_accuracy, log_loss, baseline_log_loss, brier_home,
+            features_used, metadata, notes
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (model_name, version) DO UPDATE SET
+            algorithm = EXCLUDED.algorithm,
+            scope = EXCLUDED.scope,
+            trained_at = EXCLUDED.trained_at,
+            evaluated_season = EXCLUDED.evaluated_season,
+            accuracy = EXCLUDED.accuracy,
+            baseline_accuracy = EXCLUDED.baseline_accuracy,
+            log_loss = EXCLUDED.log_loss,
+            baseline_log_loss = EXCLUDED.baseline_log_loss,
+            brier_home = EXCLUDED.brier_home,
+            features_used = EXCLUDED.features_used,
+            metadata = EXCLUDED.metadata,
+            notes = EXCLUDED.notes,
+            registered_at = NOW()
+    """
+    values = (
+        model_name,
+        version,
+        metadata.get("algorithm", "unknown"),
+        metadata.get("scope"),
+        metadata.get("trained_at"),
+        metadata.get("evaluated_test_season"),
+        scores.get("accuracy"),
+        baseline.get("accuracy"),
+        scores.get("log_loss"),
+        baseline.get("log_loss"),
+        scores.get("brier_home"),
+        len(metadata.get("features_used", [])),
+        json.dumps(metadata),
+        metadata.get("selected_by"),
+    )
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(statement, values)
+
+    LOGGER.info("Registered %s version %s (accuracy %.4f vs baseline %.4f)",
+                model_name, version, scores.get("accuracy") or 0.0, baseline.get("accuracy") or 0.0)
+    return version
+
+
+def _as_datetime(value: Any) -> Any:
+    """Convert a pandas Timestamp to one psycopg2 can adapt; leave the rest."""
+    return value.to_pydatetime() if hasattr(value, "to_pydatetime") else value
+
+
+def _prediction_rows(fixtures: pd.DataFrame, probabilities: np.ndarray,
+                     competition: str, model_version: str) -> list[tuple]:
+    """Shape scored fixtures into match_predictions rows.
+
+    The classifier's label order is AWAY_WIN, DRAW, HOME_WIN = 0, 1, 2, so the
+    probability columns are written in reverse. Getting this wrong is silent:
+    the row still satisfies the sum-to-one constraint, it just describes the
+    wrong match.
+    """
+    outcomes = np.asarray(["A", "D", "H"])[probabilities.argmax(axis=1)]
+    confidence = probabilities.max(axis=1)
+    return [
+        (
+            int(row.match_id), competition, int(row.season), _as_datetime(row.match_date),
+            int(row.home_team_id), row.home_team, int(row.away_team_id), row.away_team,
+            float(probabilities[position, 2]), float(probabilities[position, 1]),
+            float(probabilities[position, 0]), str(outcomes[position]),
+            float(confidence[position]), model_version,
+        )
+        for position, row in enumerate(fixtures.itertuples(index=False))
+    ]
+
+
+def save_fixture_predictions(connection, model, feature_columns: list[str],
+                             competition: str, model_version: str) -> int:
+    """Score and store every pending fixture of one competition.
+
+    One row per fixture per run. The history is kept on purpose: a probability
+    is a statement about a moment, and replacing yesterday's value would hide
+    exactly the movement the report exists to show.
+    """
+    fixtures = load_pending_fixtures(connection, competition)
+    if fixtures.empty:
+        LOGGER.info("%s: no pending fixtures to score", competition)
+        return 0
+
+    probabilities = fixture_probabilities(model, feature_columns, fixtures)
+    values = _prediction_rows(fixtures, probabilities, competition, model_version)
+
+    columns = [
+        "match_id", "competition", "season", "match_date",
+        "home_team_id", "home_team", "away_team_id", "away_team",
+        "prob_home", "prob_draw", "prob_away",
+        "predicted_outcome", "confidence", "model_version",
+    ]
+    statement = f"""
+        INSERT INTO match_predictions ({", ".join(columns)}) VALUES %s
+        ON CONFLICT (match_id, model_version, predicted_at) DO NOTHING
+    """
+    with connection:
+        with connection.cursor() as cursor:
+            execute_values(cursor, statement, values, page_size=200)
+
+    LOGGER.info("%s: stored %d fixture prediction(s)", competition, len(values))
+    return len(values)
+
+
 # ============================================================
 # Player projections
 # ============================================================
@@ -665,9 +810,14 @@ def main() -> int:
     rng = np.random.default_rng(args.seed)
 
     model, feature_columns = load_model()
+    model_name, metadata = active_model()
     connection = get_connection()
 
     try:
+        model_version = model_name
+        if not args.no_save:
+            model_version = register_model(connection, model_name, metadata)
+
         for competition in ("PD", "CL"):
             stats = calculate_poisson_stats(connection, competition)
             if not args.no_save:
@@ -686,6 +836,9 @@ def main() -> int:
                                      "Season in progress")
             save_title_probabilities(connection, champions, "CL", args.simulations, "lr_v1+poisson",
                                      "New league-phase format; no matches played yet")
+
+            for competition in ("PD", "CL"):
+                save_fixture_predictions(connection, model, feature_columns, competition, model_version)
 
         for competition in ("PD", "CL"):
             projections = project_player_stats(connection, competition, rng)

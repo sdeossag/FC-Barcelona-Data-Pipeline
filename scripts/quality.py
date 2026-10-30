@@ -10,10 +10,13 @@ business invariants that a single batch cannot reveal on its own.
 from __future__ import annotations
 
 import logging
+import uuid
 from dataclasses import dataclass
 from typing import Callable
+from uuid import UUID
 
 from psycopg2 import sql
+from psycopg2.extras import execute_values
 
 
 LOGGER = logging.getLogger("football_data_quality")
@@ -140,24 +143,71 @@ def _run_check(cursor, check: WarehouseCheck) -> tuple[bool, int]:
     return check.passes(value), value
 
 
-def run_warehouse_checks(connection, checks: tuple[WarehouseCheck, ...] = CHECKS) -> list[str]:
-    """Run every check and return the names of the ones that failed.
+@dataclass(frozen=True)
+class CheckResult:
+    """The outcome of one check, in the shape the results table stores."""
+
+    name: str
+    passed: bool
+    observed_value: int | None
+    expectation: str
+
+
+def evaluate_checks(connection, checks: tuple[WarehouseCheck, ...] = CHECKS) -> list[CheckResult]:
+    """Run every check and return one result per check, passed or not.
 
     All checks run even after the first failure, so one execution reports the
     full picture instead of forcing a fix-and-rerun cycle for each problem.
     """
-    failures: list[str] = []
+    results: list[CheckResult] = []
     with connection.cursor() as cursor:
         for check in checks:
             passed, value = _run_check(cursor, check)
-            if passed:
-                LOGGER.info("PASS %-38s value=%s", check.name, value)
-            else:
-                failures.append(check.name)
-                LOGGER.error("FAIL %-38s value=%s | %s", check.name, value, check.expectation)
+            observed = None if value is None else int(value)
+            results.append(CheckResult(check.name, bool(passed), observed, check.expectation))
 
-    LOGGER.info("Warehouse checks completed: %d passed, %d failed", len(checks) - len(failures), len(failures))
-    return failures
+            if passed:
+                LOGGER.info("PASS %-38s value=%s", check.name, observed)
+            else:
+                LOGGER.error("FAIL %-38s value=%s | %s", check.name, observed, check.expectation)
+
+    failures = sum(1 for result in results if not result.passed)
+    LOGGER.info("Warehouse checks completed: %d passed, %d failed", len(results) - failures, failures)
+    return results
+
+
+def save_check_results(connection, results: list[CheckResult],
+                       run_id: UUID | None = None) -> UUID:
+    """Store one row per check and return the run identifier.
+
+    The run id is generated here rather than by the database so a caller can
+    retry a write and keep the same identity in its own logs. Append-only: a
+    result is a statement about the moment the check ran.
+    """
+    run_id = run_id or uuid.uuid4()
+    values = [(str(run_id), result.name, result.passed, result.observed_value, result.expectation)
+              for result in results]
+    statement = """
+        INSERT INTO quality_check_results (
+            run_id, check_name, passed, observed_value, expectation
+        ) VALUES %s
+        ON CONFLICT (run_id, check_name) DO NOTHING
+    """
+    with connection:
+        with connection.cursor() as cursor:
+            execute_values(cursor, statement, values, page_size=100)
+
+    LOGGER.info("Stored %d check result(s) under run %s", len(values), run_id)
+    return run_id
+
+
+def run_warehouse_checks(connection, checks: tuple[WarehouseCheck, ...] = CHECKS,
+                         persist: bool = True) -> list[str]:
+    """Run every check, persist the results and return the names that failed."""
+    results = evaluate_checks(connection, checks)
+    if persist:
+        save_check_results(connection, results)
+    return [result.name for result in results if not result.passed]
 
 
 def main() -> int:
