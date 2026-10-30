@@ -27,7 +27,7 @@ __all__ = ["DEFAULT_SCHEMA", "get_connection", "get_schema", "load_to_postgres",
 
 TABLE_DEFINITIONS = {
     "matches": {
-        "columns": ["match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team", "home_goals", "away_goals", "status", "competition", "matchday", "season"],
+        "columns": ["match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team", "home_goals", "away_goals", "status", "competition", "stage", "matchday", "season"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS matches (
                 match_id BIGINT PRIMARY KEY,
@@ -40,6 +40,7 @@ TABLE_DEFINITIONS = {
                 away_goals INTEGER NOT NULL DEFAULT 0,
                 status TEXT,
                 competition TEXT,
+                stage TEXT,
                 matchday INTEGER,
                 season INTEGER,
                 loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -48,9 +49,10 @@ TABLE_DEFINITIONS = {
         "conflict_key": "match_id",
     },
     "standings": {
-        "columns": ["team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_diff", "points", "season", "matchday"],
+        "columns": ["competition", "team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_diff", "points", "season", "matchday"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS standings (
+                competition TEXT NOT NULL,
                 team_id INTEGER NOT NULL,
                 position INTEGER NOT NULL,
                 team_name TEXT NOT NULL,
@@ -65,15 +67,16 @@ TABLE_DEFINITIONS = {
                 season INTEGER,
                 matchday INTEGER,
                 loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                PRIMARY KEY (team_id, season, matchday)
+                PRIMARY KEY (competition, team_id, season, matchday)
             )
         """,
-        "conflict_key": "team_id, season, matchday",
+        "conflict_key": "competition, team_id, season, matchday",
     },
     "scorers": {
-        "columns": ["player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"],
+        "columns": ["competition", "player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"],
         "ddl": """
             CREATE TABLE IF NOT EXISTS scorers (
+                competition TEXT NOT NULL,
                 player_id INTEGER NOT NULL,
                 player_name TEXT NOT NULL,
                 team_id INTEGER NOT NULL,
@@ -83,10 +86,10 @@ TABLE_DEFINITIONS = {
                 penalties INTEGER NOT NULL DEFAULT 0,
                 season INTEGER,
                 loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                PRIMARY KEY (player_id, team_id, season)
+                PRIMARY KEY (competition, player_id, team_id, season)
             )
         """,
-        "conflict_key": "player_id, team_id, season",
+        "conflict_key": "competition, player_id, team_id, season",
     },
 }
 
@@ -106,8 +109,8 @@ def validate_quality(df: pd.DataFrame, table_name: str) -> bool:
     # would either abort the insert or, worse, merge two unrelated records.
     critical_columns = {
         "matches": ["match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team"],
-        "standings": ["team_id", "position", "team_name"],
-        "scorers": ["player_id", "team_id", "player_name", "team"],
+        "standings": ["competition", "team_id", "position", "team_name"],
+        "scorers": ["competition", "player_id", "team_id", "player_name", "team"],
     }.get(table_name, [])
     missing_columns = [column for column in critical_columns if column not in df.columns]
     if missing_columns:

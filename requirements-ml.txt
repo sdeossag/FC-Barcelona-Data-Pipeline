@@ -1,0 +1,15 @@
+# ============================================================
+# Dependencies for the prediction module
+# ============================================================
+# Kept apart from requirements.txt because the batch ETL does not need them:
+# extract, transform and load run without a single model. They are installed
+# into the Airflow image as well, since the weekly prediction DAG imports them.
+#
+# Versions are floors rather than pins: unlike the Airflow runtime, these are
+# not constrained by a published compatibility set, and a newer scikit-learn
+# does not risk breaking the scheduler.
+
+scikit-learn>=1.5     # Logistic-regression baseline, metrics, preprocessing
+xgboost>=2.1          # Gradient-boosted classifier for match outcomes
+scipy>=1.13           # Poisson sampling for scoreline simulation
+joblib>=1.4           # Model serialisation

@@ -20,18 +20,33 @@ DEFAULT_OUTPUT_DIR = REPOSITORY_ROOT / "data" / "staging"
 # any time; the ids are stable, so they are what the primary keys are built on.
 MATCH_COLUMNS = [
     "match_id", "date", "home_team_id", "home_team", "away_team_id", "away_team",
-    "home_goals", "away_goals", "status", "competition", "matchday", "season",
+    "home_goals", "away_goals", "status", "competition", "stage", "matchday", "season",
 ]
 STANDING_COLUMNS = [
-    "team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for",
+    "competition", "team_id", "position", "team_name", "played", "won", "drawn", "lost", "goals_for",
     "goals_against", "goal_diff", "points", "season", "matchday",
 ]
-SCORER_COLUMNS = ["player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"]
+SCORER_COLUMNS = ["competition", "player_id", "player_name", "team_id", "team", "goals", "assists", "penalties", "season"]
 
 # Columns that identify a row. They must never be filled with a default value:
 # a missing id has to drop the row, because defaulting it to 0 would make two
 # unrelated records collide on the same primary key.
 IDENTITY_COLUMNS = {"match_id", "home_team_id", "away_team_id", "team_id", "player_id"}
+
+# Sub-directories of data/raw/ that hold data from other sources and must not
+# be routed through these transforms.
+EXCLUDED_RAW_DIRS = frozenset({"statsbomb"})
+
+# The statuses the API documents. It does occasionally return something else:
+# match 564682 arrived with a timestamp in this field. Anything unrecognised is
+# normalised to UNKNOWN and logged, because status decides whether a match counts
+# as played, and a malformed one would quietly move a fixture between the
+# training set and the prediction set.
+VALID_MATCH_STATUSES = frozenset({
+    "SCHEDULED", "TIMED", "IN_PLAY", "PAUSED", "FINISHED",
+    "POSTPONED", "SUSPENDED", "CANCELLED", "AWARDED",
+})
+UNKNOWN_STATUS = "UNKNOWN"
 
 
 def configure_logging() -> None:
@@ -98,10 +113,23 @@ def transform_matches(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
             "away_goals": full_time.get("away"),
             "status": match.get("status"),
             "competition": competition,
+            # The Champions League restarts matchday numbering in every knockout
+            # round, so matchday alone is ambiguous. stage is what disambiguates it.
+            "stage": match.get("stage"),
             "matchday": match.get("matchday"),
             "season": season.get("startDate", "")[:4] or payload.get("filters", {}).get("season"),
         })
     frame = pd.DataFrame(rows, columns=MATCH_COLUMNS)
+
+    # Normalise the status before anything downstream reads it.
+    unexpected = frame.loc[~frame["status"].isin(VALID_MATCH_STATUSES) & frame["status"].notna(), "status"]
+    if not unexpected.empty:
+        LOGGER.warning(
+            "%d match(es) carried an unrecognised status from the API, normalised to %s: %s",
+            len(unexpected), UNKNOWN_STATUS, sorted(set(unexpected))[:5],
+        )
+        frame.loc[~frame["status"].isin(VALID_MATCH_STATUSES) & frame["status"].notna(), "status"] = UNKNOWN_STATUS
+
     frame["date"] = pd.to_datetime(frame["date"], errors="coerce", utc=True)
     for column in ["match_id", "home_team_id", "away_team_id", "home_goals", "away_goals", "matchday", "season"]:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
@@ -116,11 +144,27 @@ def transform_standings(json_path: str | Path, output_dir: str | Path = DEFAULT_
     """Transform standings tables and save the result as Parquet."""
     payload = _read_json(json_path)
     tables = payload.get("standings") or []
-    raw_rows = [row for table in tables for row in (table.get("table") or [])]
+    # The API returns one standings table per type. A season in progress yields
+    # only TOTAL, but a finished season also yields HOME and AWAY, and all three
+    # repeat the same teams. Flattening them together put the same team in the
+    # batch three times, which PostgreSQL rejects outright:
+    # "ON CONFLICT DO UPDATE command cannot affect row a second time".
+    #
+    # Only the overall table is modelled. The home and away splits stay in the
+    # raw JSON under data/raw/, so they can be added later by reprocessing
+    # rather than by re-fetching from the API.
+    raw_rows = [
+        row
+        for table in tables
+        if (table.get("type") or "TOTAL") == "TOTAL"
+        for row in (table.get("table") or [])
+    ]
     season = _season_from(payload)
     season_info = payload.get("season") or {}
     matchday = season_info.get("currentMatchday") if isinstance(season_info, dict) else None
+    competition = (payload.get("competition") or {}).get("code")
     rows = [{
+        "competition": competition,
         "team_id": (row.get("team") or {}).get("id"),
         "position": row.get("position"),
         "team_name": (row.get("team") or {}).get("name"),
@@ -136,14 +180,14 @@ def transform_standings(json_path: str | Path, output_dir: str | Path = DEFAULT_
         "matchday": matchday,
     } for row in raw_rows]
     frame = pd.DataFrame(rows, columns=STANDING_COLUMNS)
-    numeric_columns = [column for column in STANDING_COLUMNS if column != "team_name"]
+    numeric_columns = [column for column in STANDING_COLUMNS if column not in ("team_name", "competition")]
     for column in numeric_columns:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
     # Filling a statistic with zero is safe; filling team_id with zero would let
     # two different teams share a primary key, so identity columns are excluded.
     statistic_columns = [column for column in numeric_columns if column not in IDENTITY_COLUMNS]
     frame[statistic_columns] = frame[statistic_columns].fillna(0)
-    frame = frame.dropna(subset=["team_id", "position", "team_name"])
+    frame = frame.dropna(subset=["competition", "team_id", "position", "team_name"])
     return _save_and_log(frame, json_path, output_dir, "standings", len(raw_rows))
 
 
@@ -152,7 +196,9 @@ def transform_scorers(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
     payload = _read_json(json_path)
     raw_rows = payload.get("scorers") or []
     season = _season_from(payload)
+    competition = (payload.get("competition") or {}).get("code")
     rows = [{
+        "competition": competition,
         "player_id": (scorer.get("player") or {}).get("id"),
         "player_name": (scorer.get("player") or {}).get("name"),
         "team_id": (scorer.get("team") or {}).get("id"),
@@ -166,7 +212,7 @@ def transform_scorers(json_path: str | Path, output_dir: str | Path = DEFAULT_OU
     for column in ["player_id", "team_id", "goals", "assists", "penalties", "season"]:
         frame[column] = pd.to_numeric(frame[column], errors="coerce").astype("Int64")
     frame[["goals", "assists", "penalties"]] = frame[["goals", "assists", "penalties"]].fillna(0)
-    frame = frame.dropna(subset=["player_id", "team_id", "player_name", "team"])
+    frame = frame.dropna(subset=["competition", "player_id", "team_id", "player_name", "team"])
     return _save_and_log(frame, json_path, output_dir, "scorers", len(raw_rows))
 
 
@@ -182,7 +228,18 @@ def main() -> int:
     """Transform all recognized raw files in the input directory."""
     configure_logging()
     args = parse_args()
-    files = sorted(args.input_dir.glob("*.json"))
+    # rglob rather than glob: the historical extraction writes into
+    # data/raw/historical/<COMPETITION>/, and those files are transformed by
+    # exactly the same code as the daily ones. One code path, not two.
+    #
+    # The streaming layer caches StatsBomb event files under the same tree, and
+    # those follow a different schema entirely. Excluding the directory by name
+    # states that intent, rather than relying on their filenames happening not
+    # to match the routing patterns below.
+    files = sorted(
+        path for path in args.input_dir.rglob("*.json")
+        if EXCLUDED_RAW_DIRS.isdisjoint(path.parts)
+    )
     if not files:
         LOGGER.error("No JSON files found in %s", args.input_dir)
         return 1

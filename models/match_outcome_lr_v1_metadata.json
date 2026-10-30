@@ -1,0 +1,70 @@
+{
+  "model_name": "match_outcome_lr_v1",
+  "algorithm": "logistic regression",
+  "selected_by": "lowest log loss among non-baseline models on the held-out season",
+  "scope": "combined (PD + CL, competition as a feature)",
+  "evaluated_train_seasons": "<= 2024",
+  "evaluated_test_season": 2025,
+  "evaluation": {
+    "baseline (always home)": {
+      "name": "combined | baseline (always home)",
+      "accuracy": 0.4938488576449912,
+      "log_loss": 18.24353633754963,
+      "brier_home": 0.5061511423550088
+    },
+    "logistic regression": {
+      "name": "combined | logistic regression",
+      "accuracy": 0.5254833040421792,
+      "log_loss": 0.9831674434288696,
+      "brier_home": 0.2226820707304323
+    },
+    "xgboost": {
+      "name": "combined | xgboost",
+      "accuracy": 0.5026362038664324,
+      "log_loss": 1.0379183292388916,
+      "brier_home": 0.22887668013572693
+    }
+  },
+  "fitted_on_rows": 1674,
+  "fitted_on_seasons": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "features_used": [
+    "home_elo",
+    "away_elo",
+    "elo_difference",
+    "home_form_gf",
+    "home_form_ga",
+    "away_form_gf",
+    "away_form_ga",
+    "home_form_points",
+    "away_form_points",
+    "home_form_matches",
+    "away_form_matches",
+    "h2h_home_wins",
+    "h2h_draws",
+    "h2h_away_wins",
+    "h2h_home_gf",
+    "h2h_away_gf",
+    "h2h_matches",
+    "is_neutral_venue",
+    "competition_phase_final",
+    "competition_phase_group",
+    "competition_phase_league",
+    "competition_phase_playoff",
+    "competition_phase_qf",
+    "competition_phase_r16",
+    "competition_phase_sf",
+    "competition_CL",
+    "competition_PD"
+  ],
+  "result_encoding": {
+    "A": 0,
+    "D": 1,
+    "H": 2
+  },
+  "trained_at": "2026-09-07T14:10:15.903028+00:00"
+}

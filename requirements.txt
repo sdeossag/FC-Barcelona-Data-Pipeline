@@ -5,6 +5,13 @@
 # which the Dockerfile also passes to pip. Keeping them aligned means a build
 # today and a build in six months produce the same image.
 
+# Pinned explicitly even though pandas would install it anyway. A serialised
+# model carries the numpy version that created it: one trained under numpy 2.x
+# fails to load under 1.x with "No module named 'numpy._core'", because the
+# internal module was renamed between the two. Pinning keeps the training and
+# serving environments on the same side of that boundary.
+numpy==1.24.4
+
 pandas==2.1.4            # DataFrame transforms in scripts/transform.py
 pyarrow==14.0.2          # Parquet engine used by pandas .to_parquet/.read_parquet
 psycopg2-binary==2.9.9   # PostgreSQL driver used by scripts/load.py

@@ -36,6 +36,12 @@ x-airflow-common: &airflow-common
     - ./logs:/opt/airflow/logs
     - ./scripts:/opt/airflow/scripts
     - ./data:/opt/airflow/data
+
+    # Trained models. The prediction DAG loads one at runtime, and without this
+    # mount it fails on a missing file rather than at parse time, which is a far
+    # more expensive way to find out.
+    - ./models:/opt/airflow/models
+
     - ./.env:/opt/airflow/.env:ro
 
 

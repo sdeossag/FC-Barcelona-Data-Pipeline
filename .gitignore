@@ -73,7 +73,23 @@ Thumbs.db
 
 
 # ============================================================
+# Trained models
+# ============================================================
+
+# Serialised models are large binaries that git cannot diff, and they are
+# reproducible: scripts/train_model.py rebuilds them from the warehouse. The
+# metadata JSON beside each one is small and text, so it stays tracked and
+# records which data produced which accuracy.
+models/*.pkl
+models/*.joblib
+
+
+# ============================================================
 # Power BI temporary files
 # ============================================================
 
 *.tmp
+
+# Local copies of the report taken before a redesign. They are binary and
+# reproducible from Git history, so they stay out of version control.
+powerbi/backups/

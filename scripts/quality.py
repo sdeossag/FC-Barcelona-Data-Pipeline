@@ -110,6 +110,19 @@ CHECKS: tuple[WarehouseCheck, ...] = (
         passes=lambda value: value == 0,
         expectation="matches marked FINISHED must not have a future date",
     ),
+    # The source has been observed returning a timestamp in the status field.
+    # status decides whether a match is treated as played, so a malformed value
+    # silently moves a fixture between the training and prediction sets.
+    WarehouseCheck(
+        name="matches_status_recognised",
+        sql=(
+            "SELECT COUNT(*) FROM matches WHERE status NOT IN "
+            "('SCHEDULED','TIMED','IN_PLAY','PAUSED','FINISHED','POSTPONED',"
+            "'SUSPENDED','CANCELLED','AWARDED','UNKNOWN')"
+        ),
+        passes=lambda value: value == 0,
+        expectation="every match status must be one the API documents",
+    ),
     # Penalties are a subset of goals, so they can never exceed the total.
     WarehouseCheck(
         name="scorers_penalties_within_goals",
