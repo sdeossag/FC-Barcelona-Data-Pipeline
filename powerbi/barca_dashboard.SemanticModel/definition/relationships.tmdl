@@ -1,0 +1,51 @@
+relationship 5e9be2a9-80bd-4b0d-9837-087ba5747ce2
+	fromColumn: 'warehouse vw_barca_matches'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship ad13c2db-f428-4d1b-ab0e-0939af855c32
+	fromColumn: 'warehouse vw_barca_form_last5'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship 9729959d-d00d-4300-8a3f-9123b86695d0
+	fromColumn: 'warehouse vw_barca_home_away'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship bac83957-9999-45ea-af6e-a3870411268e
+	fromColumn: 'warehouse vw_title_race'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship 0c200531-09d0-4fb1-8394-6c27a1c786b9
+	fromColumn: 'warehouse vw_title_probability_history'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship 4329f814-fa96-4f04-91be-9a9c07b166c6
+	fromColumn: 'warehouse vw_team_season_summary'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship 8e1b9ab6-5e34-45f7-b52b-147530f1e62e
+	fromColumn: 'warehouse vw_top_scorers'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship 6276c5b6-d5a3-4905-96d5-83f0a55aacf8
+	fromColumn: 'warehouse vw_barca_fixtures'.comp_season_key
+	toColumn: 'warehouse vw_dim_competition'.comp_season_key
+
+relationship deb44776-1549-4cd6-b712-62e02cc47b84
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'warehouse vw_barca_matches'.Fecha
+	toColumn: 'warehouse vw_dim_date'.Fecha
+
+relationship 1ccddfe4-2dc0-4a93-ae00-463b1f889720
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'warehouse vw_barca_form_last5'.Fecha
+	toColumn: 'warehouse vw_dim_date'.Fecha
+
+relationship 0d04ffba-3851-49e1-a79d-7ad55551c603
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'warehouse vw_barca_fixtures'.Fecha
+	toColumn: 'warehouse vw_dim_date'.Fecha
+
+relationship b16bac11-b3ee-4660-9ce1-6c5c8020e621
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'warehouse vw_title_probability_history'.Fecha
+	toColumn: 'warehouse vw_dim_date'.Fecha

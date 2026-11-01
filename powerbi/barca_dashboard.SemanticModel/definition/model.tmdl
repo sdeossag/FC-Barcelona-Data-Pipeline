@@ -1,0 +1,34 @@
+model Model
+	culture: es-ES
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-CO
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["warehouse vw_dim_date","warehouse vw_dim_competition","warehouse vw_barca_matches","warehouse vw_barca_form_last5","warehouse vw_barca_home_away","warehouse vw_title_race","warehouse vw_title_probability_history","warehouse vw_team_season_summary","warehouse vw_top_scorers","warehouse vw_player_shot_quality","warehouse vw_barca_fixtures","warehouse vw_live_current_score","warehouse vw_live_events_current","warehouse vw_model_metrics","warehouse vw_quality_results_latest","warehouse vw_quality_summary","warehouse vw_pipeline_health"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table Medidas
+ref table 'warehouse vw_dim_date'
+ref table 'warehouse vw_dim_competition'
+ref table 'warehouse vw_barca_matches'
+ref table 'warehouse vw_barca_form_last5'
+ref table 'warehouse vw_barca_home_away'
+ref table 'warehouse vw_title_race'
+ref table 'warehouse vw_title_probability_history'
+ref table 'warehouse vw_team_season_summary'
+ref table 'warehouse vw_top_scorers'
+ref table 'warehouse vw_player_shot_quality'
+ref table 'warehouse vw_barca_fixtures'
+ref table 'warehouse vw_live_current_score'
+ref table 'warehouse vw_live_events_current'
+ref table 'warehouse vw_model_metrics'
+ref table 'warehouse vw_quality_results_latest'
+ref table 'warehouse vw_quality_summary'
+ref table 'warehouse vw_pipeline_health'
+
+ref cultureInfo es-ES

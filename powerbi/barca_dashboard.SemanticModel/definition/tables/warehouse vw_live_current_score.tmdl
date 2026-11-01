@@ -1,0 +1,79 @@
+table 'warehouse vw_live_current_score'
+	lineageTag: c3e968d9-94d4-424a-aedd-1321838aabd2
+
+	column 'match_id'
+		dataType: int64
+		isHidden
+		lineageTag: 4f8e83d4-9603-4ad3-991e-4c372501b238
+		summarizeBy: none
+		sourceColumn: match_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Equipo'
+		dataType: string
+		lineageTag: a5f8e51c-ef5f-4820-9023-85829775d40c
+		summarizeBy: none
+		sourceColumn: team_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Goles'
+		dataType: int64
+		formatString: #,0
+		lineageTag: ffbd774c-a42c-49ed-a303-902ae59878a3
+		summarizeBy: sum
+		sourceColumn: goals
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Tiros'
+		dataType: int64
+		formatString: #,0
+		lineageTag: ca06f774-280b-4064-8be3-4c23f240a920
+		summarizeBy: sum
+		sourceColumn: shots
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amarillas'
+		dataType: int64
+		lineageTag: 19b48506-16e2-4ee4-8188-3ace81b19d78
+		summarizeBy: sum
+		sourceColumn: yellow_cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Rojas'
+		dataType: int64
+		lineageTag: 193b3e01-f595-4af5-9e0e-e2b2289b55c1
+		summarizeBy: sum
+		sourceColumn: red_cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Minuto'
+		dataType: int64
+		lineageTag: e9df4f60-0ba0-41e1-b39d-de071fda04e8
+		summarizeBy: sum
+		sourceColumn: last_minute
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Barça'
+		dataType: boolean
+		isHidden
+		lineageTag: ca70779f-416f-48b6-bec2-5dd3b6b65c29
+		summarizeBy: none
+		sourceColumn: is_barca
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_live_current_score' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_live_current_score = Origen{[Schema="warehouse",Item="vw_live_current_score"]}[Data]
+				in
+				    vw_live_current_score

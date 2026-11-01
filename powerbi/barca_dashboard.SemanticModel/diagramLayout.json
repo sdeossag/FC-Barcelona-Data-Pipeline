@@ -1,0 +1,195 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 2091.199951171875,
+        "y": 180
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 2207.8492582083859,
+            "y": 502.42811331392727
+          },
+          "nodeIndex": "warehouse vw_goals_by_matchday",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1639.2128470724983,
+            "y": 289.34488972897617
+          },
+          "nodeIndex": "warehouse vw_live_events",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1689.7058040678269,
+            "y": 639.51133689887843
+          },
+          "nodeIndex": "warehouse vw_live_score",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2491.8492582083859,
+            "y": 490.42811331392727
+          },
+          "nodeIndex": "warehouse vw_points_by_matchday",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2775.8492582083859,
+            "y": 514.42811331392727
+          },
+          "nodeIndex": "warehouse vw_season_kpis",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1973.8492582083859,
+            "y": 439.18703901630238
+          },
+          "nodeIndex": "warehouse vw_shot_quality",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3059.8492582083859,
+            "y": 488.42811331392727
+          },
+          "nodeIndex": "warehouse vw_standings_latest",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3343.8492582083859,
+            "y": 488.42811331392727
+          },
+          "nodeIndex": "warehouse vw_team_match_results",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3627.8492582083859,
+            "y": 488.42811331392727
+          },
+          "nodeIndex": "warehouse vw_top_scorers",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2606.832156973464,
+            "y": 224.162332431442
+          },
+          "nodeIndex": "warehouse vw_barca_kpis",
+          "nodeLineageTag": "2e0bd352-f57c-4443-98ff-8f3ddfb335f5",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2872.9214030808157,
+            "y": -50
+          },
+          "nodeIndex": "warehouse vw_competition_context",
+          "nodeLineageTag": "ab1f0968-8ff4-4a80-a59d-54b7e96b83b7",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2322.6364111358876,
+            "y": 194.84176112329146
+          },
+          "nodeIndex": "warehouse vw_dim_competition",
+          "nodeLineageTag": "7d75e47a-3370-433a-a262-941077a2aee3",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2712.3321276405563,
+            "y": 574.36366543132021
+          },
+          "nodeIndex": "warehouse vw_goals_by_matchday (2)",
+          "nodeLineageTag": "679d0af1-3767-40ac-9251-65f0cf2cf492",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2272.6364111358876,
+            "y": 318.75566844943921
+          },
+          "nodeIndex": "warehouse vw_barca_goals_by_matchday",
+          "nodeLineageTag": "3d426568-87df-4c6e-95d2-d69caaff9ed5",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Todas las tablas",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Todas las tablas",
+  "defaultDiagram": "Todas las tablas"
+}

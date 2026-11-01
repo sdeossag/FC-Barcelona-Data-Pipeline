@@ -1,0 +1,221 @@
+table Medidas
+	lineageTag: 109881f9-c06b-40e8-90b1-ae7053a4f37e
+
+	column _placeholder
+		dataType: string
+		isHidden
+		lineageTag: c74c37ab-2818-40f3-b757-ed59c03b006a
+		summarizeBy: none
+		sourceColumn: _placeholder
+
+		annotation SummarizationSetBy = Automatic
+
+	measure 'Partidos jugados' = COUNTROWS ( 'warehouse vw_barca_matches' )
+		formatString: #,0
+		lineageTag: d83b3b4f-98f5-419c-9222-20e290810696
+		displayFolder: Temporada
+
+	measure Victorias = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "V" )
+		formatString: #,0
+		lineageTag: d40fd8b8-da1c-4c60-83e2-ed65c369cb5b
+		displayFolder: Temporada
+
+	measure Empates = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "E" )
+		formatString: #,0
+		lineageTag: 374fd5de-3392-49a0-9fbe-549676a723f6
+		displayFolder: Temporada
+
+	measure Derrotas = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "D" )
+		formatString: #,0
+		lineageTag: 936e0d1e-e876-4905-a3d9-d2ca77cdb83a
+		displayFolder: Temporada
+
+	measure Puntos = SUM ( 'warehouse vw_barca_matches'[Puntos] )
+		formatString: #,0
+		lineageTag: 3c1bc480-cac0-4223-86a8-447a9244544b
+		displayFolder: Temporada
+
+	measure 'Goles a favor' = SUM ( 'warehouse vw_barca_matches'[Goles a favor] )
+		formatString: #,0
+		lineageTag: 75775ef8-00da-44d0-a57e-24d135788582
+		displayFolder: Temporada
+
+	measure 'Goles en contra' = SUM ( 'warehouse vw_barca_matches'[Goles en contra] )
+		formatString: #,0
+		lineageTag: 6891808c-1571-4044-9f34-84c66e736048
+		displayFolder: Temporada
+
+	measure 'Diferencia de goles' = [Goles a favor] - [Goles en contra]
+		formatString: +#,##0;-#,##0;0
+		lineageTag: 7fb7fcdd-4374-491d-a98f-853c50b3ba71
+		displayFolder: Temporada
+
+	measure '% Victorias' = DIVIDE ( [Victorias], [Partidos jugados] )
+		formatString: 0.0%
+		lineageTag: b3536295-ae76-47d0-ae1e-71e24f4196a9
+		displayFolder: Temporada
+
+	measure 'Goles a favor por partido' = DIVIDE ( [Goles a favor], [Partidos jugados] )
+		formatString: 0.00
+		lineageTag: 7e2f3455-a738-41e9-8776-9751a0e68963
+		displayFolder: Temporada
+
+	measure 'Goles en contra por partido' = DIVIDE ( [Goles en contra], [Partidos jugados] )
+		formatString: 0.00
+		lineageTag: d6662254-21b2-4724-9c10-35c5f07f96b9
+		displayFolder: Temporada
+
+	measure 'Puntos tabla' = SUM ( 'warehouse vw_team_season_summary'[Pts] )
+		formatString: #,0
+		lineageTag: 3f397bd2-a7d5-4b13-9416-4d8df1a1ed1e
+		displayFolder: Clasificación
+
+	measure Posición = RANKX ( ALLSELECTED ( 'warehouse vw_team_season_summary'[Equipo] ), CALCULATE ( SUM ( 'warehouse vw_team_season_summary'[Pts] ) ), , DESC, DENSE )
+		formatString: #,0
+		lineageTag: 2aa93e43-4e7f-4083-a006-671235978e6e
+		displayFolder: Clasificación
+
+	measure 'Puntos acumulados' = SUM ( 'warehouse vw_title_race'[Puntos acumulados] )
+		formatString: #,0
+		lineageTag: 6a63f352-3ec9-4f52-a36c-b4575a96d950
+		displayFolder: Clasificación
+
+	measure 'Probabilidad de título' = VAR FechaMax = CALCULATE ( MAX ( 'warehouse vw_title_probability_history'[Fecha] ), 'warehouse vw_title_probability_history'[Barça] = TRUE () ) RETURN CALCULATE ( MAX ( 'warehouse vw_title_probability_history'[Probabilidad] ), 'warehouse vw_title_probability_history'[Barça] = TRUE (), 'warehouse vw_title_probability_history'[Fecha] = FechaMax )
+		formatString: 0.0%
+		lineageTag: f0aedfb3-481f-4538-9be8-7108f909e98f
+		displayFolder: Predicción
+
+	measure 'Partidos por jugar' = COUNTROWS ( FILTER ( 'warehouse vw_barca_fixtures', 'warehouse vw_barca_fixtures'[Días] >= 0 ) )
+		formatString: #,0
+		lineageTag: c968e43e-0deb-4c91-ba47-bedcfba97ece
+		displayFolder: Predicción
+
+	measure 'Confianza media' = AVERAGE ( 'warehouse vw_barca_fixtures'[Confianza] )
+		formatString: 0.0%
+		lineageTag: 065680ae-4115-43f6-a711-d5b24714a527
+		displayFolder: Predicción
+
+	measure 'Exactitud del modelo' = VAR FechaModelo = CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Entrenado] ) ) RETURN CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Exactitud] ), 'warehouse vw_model_metrics'[Entrenado] = FechaModelo )
+		formatString: 0.0%
+		lineageTag: 24ae383d-c6a4-45ed-9c84-cd826e164748
+		displayFolder: Modelo
+
+	measure 'Exactitud base' = VAR FechaModelo = CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Entrenado] ) ) RETURN CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Exactitud base] ), 'warehouse vw_model_metrics'[Entrenado] = FechaModelo )
+		formatString: 0.0%
+		lineageTag: 57ddbe3d-fb56-4d0a-b89d-7ad3cdd9bd34
+		displayFolder: Modelo
+
+	measure 'Mejora vs base' = [Exactitud del modelo] - [Exactitud base]
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: fd42f61f-0bea-4f62-89eb-eeaedab06a2a
+		displayFolder: Modelo
+
+	measure 'Log loss' = VAR FechaModelo = CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Entrenado] ) ) RETURN CALCULATE ( MAX ( 'warehouse vw_model_metrics'[Log loss] ), 'warehouse vw_model_metrics'[Entrenado] = FechaModelo )
+		formatString: 0.00
+		lineageTag: e2e7608f-8d5b-45af-b0c6-4a0874956e42
+		displayFolder: Modelo
+
+	measure 'Controles superados' = VAR UltimaCorrida = CALCULATE ( MAX ( 'warehouse vw_quality_summary'[Fecha] ) ) RETURN CALCULATE ( MAX ( 'warehouse vw_quality_summary'[Superados] ), 'warehouse vw_quality_summary'[Fecha] = UltimaCorrida )
+		formatString: #,0
+		lineageTag: 05d78d6b-c425-46df-9127-d8dfb1af0bdb
+		displayFolder: Calidad
+
+	measure 'Controles totales' = VAR UltimaCorrida = CALCULATE ( MAX ( 'warehouse vw_quality_summary'[Fecha] ) ) RETURN CALCULATE ( MAX ( 'warehouse vw_quality_summary'[Controles] ), 'warehouse vw_quality_summary'[Fecha] = UltimaCorrida )
+		formatString: #,0
+		lineageTag: 903def49-cd53-48e1-a1c7-9aa7023d5628
+		displayFolder: Calidad
+
+	measure 'Tasa de aprobación' = DIVIDE ( [Controles superados], [Controles totales] )
+		formatString: 0.0%
+		lineageTag: c47b0cc4-303f-4b98-875f-73b87c599df0
+		displayFolder: Calidad
+
+	measure 'Última carga (h)' = MIN ( 'warehouse vw_pipeline_health'[Horas] )
+		formatString: 0.0
+		lineageTag: 7762373f-a024-41e6-a909-cc20d3ac2a45
+		displayFolder: Calidad
+
+	measure 'Tablas frescas' = CALCULATE ( COUNTROWS ( 'warehouse vw_pipeline_health' ), 'warehouse vw_pipeline_health'[Fresca] = TRUE () )
+		formatString: #,0
+		lineageTag: e67d13f6-ba6d-414b-8bb6-b325982aab40
+		displayFolder: Calidad
+
+	measure 'Tablas monitorizadas' = COUNTROWS ( 'warehouse vw_pipeline_health' )
+		formatString: #,0
+		lineageTag: 9225e231-0a3d-48e3-aee1-367b7786421c
+		displayFolder: Calidad
+
+	measure 'Filas en warehouse' = SUM ( 'warehouse vw_pipeline_health'[Filas] )
+		formatString: #,0
+		lineageTag: e099ffdb-a0ba-4f37-95da-126f6e426c86
+		displayFolder: Calidad
+
+	measure 'Tasa de frescura' = DIVIDE ( [Tablas frescas], [Tablas monitorizadas] )
+		formatString: 0.0%
+		lineageTag: bd8e5df7-9c90-40c0-9f4c-76f2b87dd22b
+		displayFolder: Calidad
+
+	measure Eventos = COUNTROWS ( 'warehouse vw_live_events_current' )
+		formatString: #,0
+		lineageTag: aa8ee159-0293-4801-b140-34fba50c7bb3
+		displayFolder: En vivo
+
+	measure 'Minuto actual' = MAX ( 'warehouse vw_live_current_score'[Minuto] )
+		formatString: #,0
+		lineageTag: 9291223d-caaf-4b2e-9a82-e598518178a7
+		displayFolder: En vivo
+
+	measure 'Goles Barça' = CALCULATE ( MAX ( 'warehouse vw_live_current_score'[Goles] ), 'warehouse vw_live_current_score'[Barça] = TRUE () )
+		formatString: #,0
+		lineageTag: 8cbd8d49-2458-40bf-821b-334067fa1301
+		displayFolder: En vivo
+
+	measure 'Goles rival' = CALCULATE ( MAX ( 'warehouse vw_live_current_score'[Goles] ), 'warehouse vw_live_current_score'[Barça] = FALSE () )
+		formatString: #,0
+		lineageTag: f19bf42e-6f27-4281-90a8-faa0e0fb427d
+		displayFolder: En vivo
+
+	measure 'Tiros Barça' = CALCULATE ( MAX ( 'warehouse vw_live_current_score'[Tiros] ), 'warehouse vw_live_current_score'[Barça] = TRUE () )
+		formatString: #,0
+		lineageTag: 25635961-7571-4023-a59d-fd2a27fbe6ad
+		displayFolder: En vivo
+
+	measure 'Tiros rival' = CALCULATE ( MAX ( 'warehouse vw_live_current_score'[Tiros] ), 'warehouse vw_live_current_score'[Barça] = FALSE () )
+		formatString: #,0
+		lineageTag: 28f71834-41eb-4243-9603-8b4e1e3dec83
+		displayFolder: En vivo
+
+	measure 'xG Barça' = CALCULATE ( SUM ( 'warehouse vw_live_events_current'[xG] ), 'warehouse vw_live_events_current'[Equipo] IN { "Barcelona", "FC Barcelona" } )
+		formatString: 0.00
+		lineageTag: 0b91926a-4a4b-410a-805c-b7e9e0b6bde8
+		displayFolder: En vivo
+
+	measure 'xG rival' = CALCULATE ( SUM ( 'warehouse vw_live_events_current'[xG] ) ) - [xG Barça]
+		formatString: 0.00
+		lineageTag: 19092ca3-d981-4c72-9ef5-64cb98a53f41
+		displayFolder: En vivo
+
+	measure 'Latencia media (ms)' = AVERAGE ( 'warehouse vw_live_events_current'[Latencia (ms)] )
+		formatString: #,0
+		lineageTag: ac7e624a-5225-4908-8ff4-7460d0b41c73
+		displayFolder: En vivo
+
+	measure 'Goles + Asistencias' = SUM ( 'warehouse vw_top_scorers'[Goles] ) + SUM ( 'warehouse vw_top_scorers'[Asistencias] )
+		formatString: #,0
+		lineageTag: 1fb05552-b7e4-4a3b-804c-12f5044958e6
+		displayFolder: Jugadores
+
+	measure 'Goles sin penalti' = SUM ( 'warehouse vw_top_scorers'[Sin penalti] )
+		formatString: #,0
+		lineageTag: bfa5080b-4d64-4cdc-879f-b3bb1bd0718f
+		displayFolder: Jugadores
+
+	measure Penaltis = SUM ( 'warehouse vw_top_scorers'[Penaltis] )
+		formatString: #,0
+		lineageTag: 761743d1-9ddb-4c88-972f-1b719d8fd7e0
+		displayFolder: Jugadores
+
+	partition Medidas = m
+		mode: import
+		source =
+				#table ( { "_placeholder" }, { { "x" } } )

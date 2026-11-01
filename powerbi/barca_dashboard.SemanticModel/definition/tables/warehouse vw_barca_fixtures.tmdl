@@ -1,0 +1,197 @@
+table 'warehouse vw_barca_fixtures'
+	lineageTag: 933dd02b-2664-43a8-93ee-437706ed274c
+
+	column 'match_id'
+		dataType: int64
+		isHidden
+		lineageTag: c20ea88f-7544-4284-b670-3da67e453c19
+		summarizeBy: none
+		sourceColumn: match_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Competición'
+		dataType: string
+		lineageTag: a4a3dc54-941a-474d-b531-33729cef01d5
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporada'
+		dataType: int64
+		lineageTag: d49f4289-0b9e-429b-946d-f2f89201c1e8
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fecha'
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 642199f2-1161-4b1b-b849-bca73a2154e1
+		summarizeBy: none
+		sourceColumn: match_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'home_team_id'
+		dataType: int64
+		isHidden
+		lineageTag: f2d920ae-9b87-47f4-bd8c-4dceb5c974e9
+		summarizeBy: none
+		sourceColumn: home_team_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Local'
+		dataType: string
+		lineageTag: 1b638877-7923-405d-971d-6bb3c56067f9
+		summarizeBy: none
+		sourceColumn: home_team
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'away_team_id'
+		dataType: int64
+		isHidden
+		lineageTag: a0fc0d9b-3332-4a7c-9433-88ce5809d79f
+		summarizeBy: none
+		sourceColumn: away_team_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Visitante'
+		dataType: string
+		lineageTag: fd5f49ea-286b-49e2-9fc1-3eb1053aacb8
+		summarizeBy: none
+		sourceColumn: away_team
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Prob. local'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 83ee5fcf-562f-4dd8-abaf-4ec58dcc8bba
+		summarizeBy: none
+		sourceColumn: prob_home
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Prob. empate'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: ac2df806-800a-4dd7-85fa-2ad556611322
+		summarizeBy: none
+		sourceColumn: prob_draw
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Prob. visita'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 71b70f50-74c8-4f4c-99a8-d4b5277b6fad
+		summarizeBy: none
+		sourceColumn: prob_away
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resultado previsto'
+		dataType: string
+		lineageTag: ef2be58b-fe36-41a5-a968-e6a1f34561bc
+		summarizeBy: none
+		sourceColumn: predicted_outcome
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Predicción'
+		dataType: string
+		lineageTag: 50c0f684-01a3-448f-9a6d-1282d63d2779
+		summarizeBy: none
+		sourceColumn: predicted_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Confianza'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 3f7d532c-0bc2-45c8-8556-9b28b2f113f9
+		summarizeBy: none
+		sourceColumn: confidence
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Modelo'
+		dataType: string
+		lineageTag: b957111a-8d71-4767-a352-ea7edd79d48d
+		summarizeBy: none
+		sourceColumn: model_version
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Predicho'
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 1f530064-4785-48a6-a06f-3549f6a0d872
+		summarizeBy: none
+		sourceColumn: predicted_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'comp_season_key'
+		dataType: string
+		isHidden
+		lineageTag: 068af38a-c64a-4cfb-875b-e159365a9262
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Barça local'
+		dataType: boolean
+		lineageTag: a34b5c36-19a0-4df8-b803-c6057b413a7f
+		summarizeBy: none
+		sourceColumn: is_barca_home
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Rival'
+		dataType: string
+		lineageTag: 75adc2b5-b726-491c-a784-438074ea62e1
+		summarizeBy: none
+		sourceColumn: opponent
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sede'
+		dataType: string
+		lineageTag: b514d4b9-07b7-4806-a2f4-aa52637de046
+		summarizeBy: none
+		sourceColumn: venue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Días'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3e4d64a8-14f8-443c-8d1f-ee6cdadeaecd
+		summarizeBy: sum
+		sourceColumn: days_until
+
+		annotation SummarizationSetBy = Automatic
+
+	column Partido = 'warehouse vw_barca_fixtures'[Local] & " - " & 'warehouse vw_barca_fixtures'[Visitante]
+		dataType: string
+		lineageTag: 365486bd-b6a9-4bc1-b40b-41b2ed06ee45
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_barca_fixtures' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_barca_fixtures = Origen{[Schema="warehouse",Item="vw_barca_fixtures"]}[Data]
+				in
+				    vw_barca_fixtures

@@ -1,0 +1,157 @@
+table 'warehouse vw_model_metrics'
+	lineageTag: 6bc7320e-c84e-474d-a26d-548e5615c42e
+
+	column 'Modelo'
+		dataType: string
+		lineageTag: 580a5be3-e59d-406e-87b7-4f16ae72b483
+		summarizeBy: none
+		sourceColumn: model_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Versión'
+		dataType: string
+		lineageTag: 3558aa91-cf04-457a-b41d-e3fe9ad25768
+		summarizeBy: none
+		sourceColumn: version
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Algoritmo'
+		dataType: string
+		lineageTag: ebed7cac-c72f-462c-ab3b-26e33dcc4934
+		summarizeBy: none
+		sourceColumn: algorithm
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Ámbito'
+		dataType: string
+		lineageTag: 3989ddac-c3bc-4281-90a9-02c5caf05e38
+		summarizeBy: none
+		sourceColumn: scope
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entrenado'
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 651f9378-cc14-49e5-8114-220745dae817
+		summarizeBy: none
+		sourceColumn: trained_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporada evaluada'
+		dataType: int64
+		lineageTag: ee2cb951-21bd-4aaf-9395-e2583f67467d
+		summarizeBy: none
+		sourceColumn: evaluated_season
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Exactitud'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: e679a6cd-48e7-40e4-add4-3c6cc48d78a8
+		summarizeBy: none
+		sourceColumn: accuracy
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Exactitud base'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: f274b110-1155-48fe-832e-905b1edbaf00
+		summarizeBy: none
+		sourceColumn: baseline_accuracy
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Mejora'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 4e6b4eb5-cc74-4e61-b871-b18ae17a2064
+		summarizeBy: none
+		sourceColumn: accuracy_lift
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Log loss'
+		dataType: double
+		formatString: 0.00
+		lineageTag: cd37fad8-b373-48b4-83d6-93fe72bd9170
+		summarizeBy: none
+		sourceColumn: log_loss
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Log loss base'
+		dataType: double
+		formatString: 0.00
+		lineageTag: 727fd66c-0a1f-40d3-925b-6f31def59895
+		summarizeBy: none
+		sourceColumn: baseline_log_loss
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Brier local'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 557dfe23-6313-4e1a-808c-c2654de94155
+		summarizeBy: none
+		sourceColumn: brier_home
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Variables'
+		dataType: int64
+		formatString: #,0
+		lineageTag: c1d46b31-64c3-4746-856b-985a92aca54b
+		summarizeBy: sum
+		sourceColumn: features_used
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Metadatos'
+		dataType: string
+		isHidden
+		lineageTag: 656f1a2a-0fd7-4419-a56e-615de0b0ebf9
+		summarizeBy: none
+		sourceColumn: metadata
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Notas'
+		dataType: string
+		lineageTag: 575135f7-e201-45fc-9430-3a8fd3c3466f
+		summarizeBy: none
+		sourceColumn: notes
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Registrado'
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: fd917cb9-5ff6-4671-b022-8810bab5b37d
+		summarizeBy: none
+		sourceColumn: registered_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Supera base'
+		dataType: boolean
+		lineageTag: 386ef138-6c3c-4b26-965d-7a33f1068639
+		summarizeBy: none
+		sourceColumn: beats_baseline
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_model_metrics' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_model_metrics = Origen{[Schema="warehouse",Item="vw_model_metrics"]}[Data]
+				in
+				    vw_model_metrics

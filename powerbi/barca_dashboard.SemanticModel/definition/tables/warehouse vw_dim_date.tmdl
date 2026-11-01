@@ -1,0 +1,104 @@
+table 'warehouse vw_dim_date'
+	dataCategory: Time
+	lineageTag: 581ca1ce-e8ae-4345-8867-66c5d65d2fbf
+
+	column 'Fecha'
+		dataType: dateTime
+		isKey
+		formatString: dd/MM/yyyy
+		lineageTag: 698e67b0-886a-410b-8ddb-ee492ddcec95
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Año'
+		dataType: int64
+		lineageTag: 1cfc78c2-6d48-4f15-aafc-4afd079fe44f
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Mes'
+		dataType: int64
+		lineageTag: b35a048a-8a15-478a-b002-8c3c0df322db
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nombre del mes'
+		dataType: string
+		lineageTag: ca6314ee-d7af-4014-a52f-0cf36d3ded7c
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: Mes
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Trimestre'
+		dataType: int64
+		lineageTag: 820d70c2-ff9d-45b5-84ff-425450bab9c8
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Año-mes'
+		dataType: string
+		lineageTag: 956dfdf3-52b9-4624-8c19-61b66b8b86b1
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Año ISO'
+		dataType: int64
+		lineageTag: cbc25e6b-244a-4c1d-a14d-ff3834ff8f71
+		summarizeBy: none
+		sourceColumn: iso_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Semana ISO'
+		dataType: int64
+		lineageTag: abd87d21-5138-42a2-9693-6b042c8b6161
+		summarizeBy: none
+		sourceColumn: iso_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Día'
+		dataType: int64
+		lineageTag: 8a997e08-ad2d-4790-b858-d3de5272beca
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Día de la semana'
+		dataType: string
+		lineageTag: a5412d7f-6ae6-479d-9f98-a258ea05d44f
+		summarizeBy: none
+		sourceColumn: day_name
+		sortByColumn: Día
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fin de semana'
+		dataType: boolean
+		lineageTag: c4e9e38e-4ca7-4e05-9453-79102a58dca0
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_dim_date' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_dim_date = Origen{[Schema="warehouse",Item="vw_dim_date"]}[Data]
+				in
+				    vw_dim_date

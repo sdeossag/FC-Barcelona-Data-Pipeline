@@ -1,0 +1,65 @@
+table 'warehouse vw_quality_summary'
+	lineageTag: 32724f9a-423a-41e0-b392-99b63f0d4329
+
+	column 'run_id'
+		dataType: string
+		isHidden
+		lineageTag: 9d5cf72b-a7e2-4fac-a3a3-fc9e67e8d6b3
+		summarizeBy: none
+		sourceColumn: run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fecha'
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: e70f0564-4e93-4668-b12a-caa718779861
+		summarizeBy: none
+		sourceColumn: checked_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Controles'
+		dataType: int64
+		formatString: #,0
+		lineageTag: f2ab7184-e416-4678-ab2f-a1cef71e51f3
+		summarizeBy: sum
+		sourceColumn: checks_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Superados'
+		dataType: int64
+		formatString: #,0
+		lineageTag: d9b7aa24-def9-47a1-a961-a2c39c8c5a46
+		summarizeBy: sum
+		sourceColumn: checks_passed
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fallidos'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 57ae070d-d072-46b0-a591-2031ac1f9690
+		summarizeBy: sum
+		sourceColumn: checks_failed
+
+		annotation SummarizationSetBy = Automatic
+
+	column '% Aprobación'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a67e0395-92c7-48e5-a040-4f1aa6af364f
+		summarizeBy: none
+		sourceColumn: pass_rate
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_quality_summary' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_quality_summary = Origen{[Schema="warehouse",Item="vw_quality_summary"]}[Data]
+				in
+				    vw_quality_summary

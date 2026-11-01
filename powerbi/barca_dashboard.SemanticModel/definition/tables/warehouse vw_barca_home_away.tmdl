@@ -1,0 +1,134 @@
+table 'warehouse vw_barca_home_away'
+	lineageTag: a3bee784-d9e8-4c37-a573-a716dcd86a91
+
+	column 'comp_season_key'
+		dataType: string
+		isHidden
+		lineageTag: 59ab3675-9489-4fb6-88e7-612832667968
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Competición'
+		dataType: string
+		lineageTag: 72d68690-ea88-4a9d-a578-fcb09ca9b030
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporada'
+		dataType: int64
+		lineageTag: c09dfac6-0b0f-433e-b9cc-c9e4a212aa52
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sede'
+		dataType: string
+		lineageTag: 33bf0bd7-f11b-4fa1-99c7-b23878aff37c
+		summarizeBy: none
+		sourceColumn: venue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'PJ'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 488a48ab-fcf3-4d7a-8c93-52e9a4eb7d99
+		summarizeBy: sum
+		sourceColumn: matches_played
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Victorias'
+		dataType: int64
+		formatString: #,0
+		lineageTag: a763fc29-c968-4390-8161-6d97abf2f589
+		summarizeBy: sum
+		sourceColumn: wins
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Empates'
+		dataType: int64
+		formatString: #,0
+		lineageTag: b503b29f-d516-4b17-a7a5-bc8e5514df0d
+		summarizeBy: sum
+		sourceColumn: draws
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Derrotas'
+		dataType: int64
+		formatString: #,0
+		lineageTag: b943d685-c9b8-4d7b-9719-f4a0d132f5c0
+		summarizeBy: sum
+		sourceColumn: losses
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Goles a favor'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 52a9c99f-4767-48c4-aa79-7c58c103ec7a
+		summarizeBy: sum
+		sourceColumn: goals_for
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Goles en contra'
+		dataType: int64
+		formatString: #,0
+		lineageTag: d15ccba1-769a-45d9-91fc-d9a238fc803d
+		summarizeBy: sum
+		sourceColumn: goals_against
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'GF/partido'
+		dataType: double
+		formatString: 0.00
+		lineageTag: 674e6055-e52f-4e78-aa7f-66063927343d
+		summarizeBy: none
+		sourceColumn: goals_for_per_match
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'GC/partido'
+		dataType: double
+		formatString: 0.00
+		lineageTag: 47c24f08-bd9e-4560-b911-160f2ddf3cec
+		summarizeBy: none
+		sourceColumn: goals_against_per_match
+
+		annotation SummarizationSetBy = Automatic
+
+	column '% Victorias'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 543b7b22-cde8-44ae-b60d-6ab08bf1177b
+		summarizeBy: none
+		sourceColumn: win_rate
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Puntos'
+		dataType: int64
+		formatString: #,0
+		lineageTag: fca87d3c-3410-40c1-9d33-314b8db3544e
+		summarizeBy: sum
+		sourceColumn: points
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_barca_home_away' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_barca_home_away = Origen{[Schema="warehouse",Item="vw_barca_home_away"]}[Data]
+				in
+				    vw_barca_home_away

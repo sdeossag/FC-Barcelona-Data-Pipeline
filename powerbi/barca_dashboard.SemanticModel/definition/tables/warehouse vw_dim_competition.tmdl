@@ -1,0 +1,52 @@
+table 'warehouse vw_dim_competition'
+	lineageTag: cd88f206-35f6-45bb-9594-e517e134cd6c
+
+	column 'comp_season_key'
+		dataType: string
+		isHidden
+		lineageTag: cfa04c11-6b5a-4728-98a6-7a44c5b697a7
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Código'
+		dataType: string
+		lineageTag: 4b55d38a-31de-4db0-aaca-bb4075d3236c
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporada (número)'
+		dataType: int64
+		lineageTag: bd8d267b-672c-4879-a44e-3f9d7eca45ac
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Competición'
+		dataType: string
+		lineageTag: c25964ff-4563-4e93-b523-726f0b5bb9a0
+		summarizeBy: none
+		sourceColumn: competition_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporada'
+		dataType: string
+		lineageTag: 0d446090-3140-4712-aa82-037dd407a77f
+		summarizeBy: none
+		sourceColumn: season_label
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_dim_competition' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_dim_competition = Origen{[Schema="warehouse",Item="vw_dim_competition"]}[Data]
+				in
+				    vw_dim_competition
