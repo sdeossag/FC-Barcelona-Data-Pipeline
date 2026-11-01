@@ -258,7 +258,9 @@ GROUP BY competition, season, stage, matchday;
 -- flowing through the streaming layer, so it is real data the project owns.
 -- Dropped first because CREATE OR REPLACE VIEW can only append columns at the
 -- end of the list: it cannot insert one, and reordering reads to PostgreSQL as
--- renaming every column that follows.
+-- renaming every column that follows. The dependent aggregate is dropped too,
+-- so this file can be re-applied to an existing warehouse.
+DROP VIEW IF EXISTS warehouse.vw_player_shot_quality;
 DROP VIEW IF EXISTS warehouse.vw_shot_quality;
 
 CREATE VIEW warehouse.vw_shot_quality AS
@@ -343,7 +345,24 @@ SELECT
     -- Processing time: when this row was written.
     ingested_at,
     -- End-to-end pipeline latency, in milliseconds.
-    ROUND(EXTRACT(EPOCH FROM (ingested_at - produced_at)) * 1000) AS pipeline_latency_ms
+    ROUND(EXTRACT(EPOCH FROM (ingested_at - produced_at)) * 1000) AS pipeline_latency_ms,
+
+    -- Event names as a reader should see them. The stream carries the provider's
+    -- machine codes; the report should not.
+    CASE event_type
+        WHEN 'GOAL'          THEN 'Gol'
+        WHEN 'SHOT'          THEN 'Tiro'
+        WHEN 'YELLOW_CARD'   THEN 'Tarjeta amarilla'
+        WHEN 'RED_CARD'      THEN 'Tarjeta roja'
+        WHEN 'PERIOD_END'    THEN 'Fin de periodo'
+        WHEN 'PERIOD_START'  THEN 'Inicio de periodo'
+        WHEN 'SUBSTITUTION'  THEN 'Cambio'
+        WHEN 'PASS'          THEN 'Pase'
+        WHEN 'FOUL'          THEN 'Falta'
+        WHEN 'OFFSIDE'       THEN 'Fuera de juego'
+        WHEN 'CORNER'        THEN 'Córner'
+        ELSE initcap(replace(event_type, '_', ' '))
+    END AS event_label
 FROM warehouse.live_events;
 
 
@@ -476,6 +495,13 @@ FROM generate_series('2022-01-01'::date, '2027-12-31'::date, '1 day'::interval) 
 -- vw_team_match_results already unfolds the fixture into two rows. This view
 -- narrows it to Barcelona and adds the display columns a table visual needs:
 -- a scoreline as text, a one-letter result and a venue label.
+-- Dropped first because the date column changes from timestamp with time zone to
+-- date. A view cannot change a column type through CREATE OR REPLACE, and the
+-- dependent views below expanded this one's column list when they were created.
+DROP VIEW IF EXISTS warehouse.vw_barca_home_away;
+DROP VIEW IF EXISTS warehouse.vw_barca_form_last5;
+DROP VIEW IF EXISTS warehouse.vw_barca_matches;
+
 CREATE OR REPLACE VIEW warehouse.vw_barca_matches AS
 SELECT
     match_id,
@@ -485,7 +511,11 @@ SELECT
     stage,
     is_group_stage,
     matchday,
-    date,
+    -- Cast here, not in the report. Kick-off times arrive in UTC and Power BI
+    -- converts a timestamp to the viewer's time zone, so a fixture stored at
+    -- 00:00 UTC would render as the previous day. A fixture date is a calendar
+    -- day, not an instant, so the conversion belongs in the view.
+    date::date AS date,
     opponent_id,
     opponent_name,
     is_home,
@@ -577,12 +607,17 @@ GROUP BY player_name, team_name;
 -- ------------------------------------------------------------
 -- DISTINCT ON keeps the most recent prediction for each match while leaving
 -- the history in the table for a movement chart later.
+-- Dropped first: the fixture date changes from timestamp to date, and the
+-- dependent fixtures view cannot survive a column type change.
+DROP VIEW IF EXISTS warehouse.vw_barca_fixtures;
+DROP VIEW IF EXISTS warehouse.vw_latest_match_predictions;
+
 CREATE OR REPLACE VIEW warehouse.vw_latest_match_predictions AS
 SELECT DISTINCT ON (match_id)
     match_id,
     competition,
     season,
-    match_date,
+    match_date::date AS match_date,
     home_team_id,
     home_team,
     away_team_id,
@@ -663,7 +698,46 @@ WITH latest AS (
     ORDER BY checked_at DESC
     LIMIT 1
 )
-SELECT q.run_id, q.check_name, q.passed, q.observed_value, q.expectation, q.checked_at
+SELECT
+    q.run_id,
+    q.check_name,
+    q.passed,
+    q.observed_value,
+    q.expectation,
+    q.checked_at,
+    -- Readable labels live in the view, not in the report. The quality job
+    -- writes machine names and English rule text; translating them once keeps
+    -- every visual, tooltip and export in the same language.
+    CASE q.check_name
+        WHEN 'matches_present'                     THEN 'Partidos cargados'
+        WHEN 'standings_present'                   THEN 'Clasificación cargada'
+        WHEN 'scorers_present'                     THEN 'Goleadores cargados'
+        WHEN 'matches_freshness'                   THEN 'Frescura de partidos'
+        WHEN 'matches_unique_ids'                  THEN 'IDs de partido únicos'
+        WHEN 'standings_games_add_up'              THEN 'Partidos jugados = V + E + D'
+        WHEN 'standings_goal_difference_consistent' THEN 'Diferencia de goles coherente'
+        WHEN 'matches_no_negative_goals'           THEN 'Goles no negativos'
+        WHEN 'matches_finished_not_in_future'      THEN 'Sin finalizados en el futuro'
+        WHEN 'matches_status_recognised'           THEN 'Estados reconocidos'
+        WHEN 'scorers_penalties_within_goals'      THEN 'Penaltis dentro de los goles'
+        WHEN 'standings_played_within_season'      THEN 'Partidos dentro de la temporada'
+        ELSE initcap(replace(q.check_name, '_', ' '))
+    END AS check_label,
+    CASE q.check_name
+        WHEN 'matches_present'                     THEN 'La tabla de partidos debe tener al menos una fila'
+        WHEN 'standings_present'                   THEN 'La clasificación debe tener al menos una fila'
+        WHEN 'scorers_present'                     THEN 'La tabla de goleadores debe tener al menos una fila'
+        WHEN 'matches_freshness'                   THEN 'Los partidos deben haberse cargado en las últimas 30 horas'
+        WHEN 'matches_unique_ids'                  THEN 'match_id debe ser único en la tabla de partidos'
+        WHEN 'standings_games_add_up'              THEN 'Jugados debe ser igual a ganados + empatados + perdidos'
+        WHEN 'standings_goal_difference_consistent' THEN 'La diferencia de goles debe ser goles a favor menos goles en contra'
+        WHEN 'matches_no_negative_goals'           THEN 'Los goles nunca pueden ser negativos'
+        WHEN 'matches_finished_not_in_future'      THEN 'Un partido finalizado no puede tener fecha futura'
+        WHEN 'matches_status_recognised'           THEN 'Cada estado debe ser uno de los que documenta la API'
+        WHEN 'scorers_penalties_within_goals'      THEN 'Un goleador no puede tener más penaltis que goles'
+        ELSE q.expectation
+    END AS expectation_es,
+    CASE WHEN q.passed THEN 'Superado' ELSE 'Atención' END AS status_label
 FROM warehouse.quality_check_results q
 JOIN latest USING (run_id);
 
@@ -719,17 +793,22 @@ WITH health AS (
     FROM warehouse.quality_check_results
 )
 SELECT
-    table_name,
-    source,
-    row_count,
-    last_write,
-    ROUND(EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0, 1) AS age_hours,
-    CASE
-        WHEN last_write IS NULL THEN FALSE
-        ELSE EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0 <= threshold_hours
-    END AS is_fresh,
-    threshold_hours
-FROM health;
+    h.*,
+    CASE WHEN h.is_fresh THEN 'Fresca' ELSE 'Vencida' END AS freshness_label
+FROM (
+    SELECT
+        table_name,
+        source,
+        row_count,
+        last_write,
+        ROUND(EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0, 1) AS age_hours,
+        CASE
+            WHEN last_write IS NULL THEN FALSE
+            ELSE EXTRACT(EPOCH FROM (NOW() - last_write)) / 3600.0 <= threshold_hours
+        END AS is_fresh,
+        threshold_hours
+    FROM health
+) h;
 
 
 -- ------------------------------------------------------------
@@ -798,7 +877,9 @@ SELECT
     RANK() OVER (
         PARTITION BY competition, season, calculated_date
         ORDER BY title_probability DESC
-    ) AS probability_rank
+    ) AS probability_rank,
+    -- Appended last: CREATE OR REPLACE VIEW can only add columns at the end.
+    d.competition || '-' || d.season AS comp_season_key
 FROM daily d;
 
 
