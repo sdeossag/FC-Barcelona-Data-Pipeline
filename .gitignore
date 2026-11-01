@@ -97,3 +97,7 @@ powerbi/backups/
 # Both are regenerated on open and would leak local paths or imported rows.
 **/.pbi/cache.abf
 **/.pbi/localSettings.json
+
+# Cached Microsoft JSON schemas used by the PBIR validator.
+powerbi/tools/.schema_cache/
+__pycache__/

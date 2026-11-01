@@ -219,3 +219,14 @@ table Medidas
 		mode: import
 		source =
 				#table ( { "_placeholder" }, { { "x" } } )
+
+	measure 'Goles texto' = FORMAT ( [Goles a favor], "#,0" ) & " / " & FORMAT ( [Goles en contra], "#,0" )
+		displayFolder: Temporada
+
+	measure 'Color equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#004D98", "#16181D" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#E8EFF8", "#FFFFFF" )
+		isHidden
+		displayFolder: Formato
