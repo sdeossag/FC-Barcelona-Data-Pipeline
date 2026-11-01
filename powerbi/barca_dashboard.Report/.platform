@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "barca_dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "3c129bda-b620-4d14-844c-1367513a6559"
+  }
+}
