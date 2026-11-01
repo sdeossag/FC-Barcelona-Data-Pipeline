@@ -93,3 +93,7 @@ models/*.joblib
 # Local copies of the report taken before a redesign. They are binary and
 # reproducible from Git history, so they stay out of version control.
 powerbi/backups/
+# Power BI Desktop local state: cached data and per-machine settings.
+# Both are regenerated on open and would leak local paths or imported rows.
+**/.pbi/cache.abf
+**/.pbi/localSettings.json
