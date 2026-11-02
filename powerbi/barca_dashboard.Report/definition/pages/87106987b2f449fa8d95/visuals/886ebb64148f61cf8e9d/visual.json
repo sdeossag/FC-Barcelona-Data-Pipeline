@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "27c17ff830ca6472d4c3",
+  "name": "886ebb64148f61cf8e9d",
   "position": {
-    "x": 24,
-    "y": 14,
-    "z": 0,
-    "height": 56,
-    "width": 640,
-    "tabOrder": 0
+    "x": 0,
+    "y": 72,
+    "z": 10,
+    "height": 4,
+    "width": 1280,
+    "tabOrder": 10
   },
   "visual": {
     "visualType": "textbox",
@@ -19,28 +19,12 @@
               {
                 "textRuns": [
                   {
-                    "value": "Partidos",
+                    "value": " ",
                     "textStyle": {
-                      "fontFamily": "Segoe UI Semibold",
-                      "fontSize": "20pt",
-                      "color": "#16181D"
+                      "fontSize": "1pt"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "left"
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Resultados, local contra visitante y forma reciente",
-                    "textStyle": {
-                      "fontFamily": "Segoe UI",
-                      "fontSize": "10pt",
-                      "color": "#6D7178"
-                    }
-                  }
-                ],
-                "horizontalTextAlignment": "left"
+                ]
               }
             ]
           }
@@ -67,7 +51,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -76,7 +60,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#A50044'"
                     }
                   }
                 }
@@ -98,7 +82,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -107,7 +91,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E6E2D9'"
+                      "Value": "'#A50044'"
                     }
                   }
                 }
@@ -116,7 +100,7 @@
             "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "0D"
                 }
               }
             },

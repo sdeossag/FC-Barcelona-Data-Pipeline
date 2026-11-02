@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from layout import G, M, W, data_table, header, kpi_row, span
-from pbir import (BLUE, CANVAS, INK, RIVAL, Page, col, color, container,
+from pbir import (BLUE, CANVAS, GRANATE, INK, RIVAL, Page, col, color, container,
                   in_filter, lit, meas, projection)
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
@@ -35,7 +35,7 @@ def team_selector(team):
 page = Page(REPORT / PAGE_ID)
 header(page, "Temporada", "FC Barcelona · resultados, puntos y clasificación")
 y = kpi_row(page, [
-    ("Puntos", "Puntos", BLUE),
+    ("Puntos", "Puntos", BLUE, "hero"),
     ("Partidos jugados", "Partidos jugados", INK),
     ("Goles a favor / en contra", "Goles texto", INK),
     ("% de victorias", "% Victorias", INK),
@@ -81,7 +81,7 @@ data_table(page, "standings", M + race_w + G, mid_y, W - race_w - G, 720 - 16 - 
            "Tabla de posiciones", [
     (meas("Posición"), "#"), col(SUMMARY, "Equipo"), (meas("PJ tabla"), "PJ"),
     (meas("DG tabla"), "DG"), (meas("Puntos tabla"), "Pts"),
-], meas("Puntos tabla"), widths=[0.1, 0.48, 0.12, 0.15, 0.15],
+], meas("Posición"), "Ascending", widths=[0.09, 0.5, 0.11, 0.15, 0.15],
     # Highlight Barcelona's whole row, not just the name cell.
     styled=[(ref, "Color equipo", "Fondo equipo") for ref in (
         "Medidas.Posición", f"{SUMMARY}.Equipo", "Medidas.PJ tabla",
@@ -100,7 +100,7 @@ page.add("goals", M, bot_y, race_w, 720 - 16 - bot_y, {
                                    "fontSize": lit(9)}}],
         "dataPoint": [
             {"properties": {"fill": color(BLUE)}, "selector": {"metadata": "Medidas.Goles a favor"}},
-            {"properties": {"fill": color(RIVAL)}, "selector": {"metadata": "Medidas.Goles en contra"}},
+            {"properties": {"fill": color(GRANATE)}, "selector": {"metadata": "Medidas.Goles en contra"}},
         ],
         "categoryAxis": [{"properties": {"fontSize": lit(9)}}],
         "valueAxis": [{"properties": {"fontSize": lit(9), "showAxisTitle": lit(False)}}],

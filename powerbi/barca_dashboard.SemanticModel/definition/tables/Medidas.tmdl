@@ -15,17 +15,17 @@ table Medidas
 		lineageTag: d83b3b4f-98f5-419c-9222-20e290810696
 		displayFolder: Temporada
 
-	measure Victorias = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "V" )
+	measure Victorias = COALESCE ( CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "V" ), 0 )
 		formatString: #,0
 		lineageTag: d40fd8b8-da1c-4c60-83e2-ed65c369cb5b
 		displayFolder: Temporada
 
-	measure Empates = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "E" )
+	measure Empates = COALESCE ( CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "E" ), 0 )
 		formatString: #,0
 		lineageTag: 374fd5de-3392-49a0-9fbe-549676a723f6
 		displayFolder: Temporada
 
-	measure Derrotas = CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "D" )
+	measure Derrotas = COALESCE ( CALCULATE ( COUNTROWS ( 'warehouse vw_barca_matches' ), 'warehouse vw_barca_matches'[result_code] = "D" ), 0 )
 		formatString: #,0
 		lineageTag: 936e0d1e-e876-4905-a3d9-d2ca77cdb83a
 		displayFolder: Temporada
@@ -231,11 +231,11 @@ table Medidas
 	measure 'Goles texto' = FORMAT ( [Goles a favor], "#,0" ) & " / " & FORMAT ( [Goles en contra], "#,0" )
 		displayFolder: Temporada
 
-	measure 'Color equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#004D98", "#16181D" )
+	measure 'Color equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#FFFFFF", "#16181D" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#E8EFF8", "#FFFFFF" )
+	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#004D98", "#FFFFFF" )
 		isHidden
 		displayFolder: Formato
 

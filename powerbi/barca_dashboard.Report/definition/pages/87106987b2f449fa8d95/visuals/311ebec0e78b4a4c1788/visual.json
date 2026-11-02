@@ -3,11 +3,11 @@
   "name": "311ebec0e78b4a4c1788",
   "position": {
     "x": 24,
-    "y": 528,
-    "z": 90,
-    "height": 176,
+    "y": 536,
+    "z": 100,
+    "height": 168,
     "width": 817,
-    "tabOrder": 90
+    "tabOrder": 100
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -120,7 +120,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#B4B2A9'"
+                      "Value": "'#A50044'"
                     }
                   }
                 }

@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from layout import G, M, W, data_table, header, kpi_row, span
-from pbir import (BLUE, CANVAS, INK, Page, col, color, container, lit, meas,
+from pbir import (BLUE, CANVAS, GRANATE, INK, Page, col, color, container, lit, meas,
                   projection)
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
@@ -15,22 +15,22 @@ HOME_AWAY = "warehouse vw_barca_home_away"
 page = Page(REPORT / PAGE_ID)
 header(page, "Partidos", "Resultados, local contra visitante y forma reciente")
 y = kpi_row(page, [
-    ("Victorias", "Victorias", INK),
+    ("Victorias", "Victorias", INK, "hero"),
     ("Empates", "Empates", INK),
-    ("Derrotas", "Derrotas", INK),
+    ("Derrotas", "Derrotas", GRANATE),
     ("Diferencia de goles", "Diferencia de goles", BLUE),
 ])
 
 # ---- Middle row: recent form, home/away table and win-rate bars -----------
-mid_y, mid_h = y + G, 200
-form_w = span(4)
+mid_y, mid_h = y + G, 212
+form_w = span(5)
 data_table(page, "form", M, mid_y, form_w, mid_h, "Forma reciente: últimos 5", [
     col(FORM, "Fecha"), col(FORM, "Resultado"), col(FORM, "Rival"), col(FORM, "Sede"),
     col(FORM, "Marcador"),
-], col(FORM, "Fecha"), "Descending", widths=[0.2, 0.17, 0.33, 0.13, 0.17],
+], col(FORM, "Fecha"), "Descending", widths=[0.22, 0.18, 0.3, 0.12, 0.18],
     styled=[(f"{FORM}.Resultado", "Color forma", None)])
 
-split_w = span(5)
+split_w = span(4)
 data_table(page, "home_away", M + form_w + G, mid_y, split_w, mid_h, "Casa contra fuera", [
     col(HOME_AWAY, "Sede"), col(HOME_AWAY, "PJ"), col(HOME_AWAY, "% Victorias"),
     col(HOME_AWAY, "GF/partido"), col(HOME_AWAY, "GC/partido"),

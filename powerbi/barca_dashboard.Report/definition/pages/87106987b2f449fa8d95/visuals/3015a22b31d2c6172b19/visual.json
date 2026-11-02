@@ -3,11 +3,11 @@
   "name": "3015a22b31d2c6172b19",
   "position": {
     "x": 853,
-    "y": 180,
-    "z": 80,
-    "height": 524,
+    "y": 188,
+    "z": 90,
+    "height": 516,
     "width": 403,
-    "tabOrder": 80
+    "tabOrder": 90
   },
   "visual": {
     "visualType": "tableEx",
@@ -102,10 +102,10 @@
                     "Entity": "Medidas"
                   }
                 },
-                "Property": "Puntos tabla"
+                "Property": "Posición"
               }
             },
-            "direction": "Descending"
+            "direction": "Ascending"
           }
         ]
       }
@@ -471,7 +471,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "38D"
+                  "Value": "32D"
                 }
               }
             }
@@ -485,7 +485,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "182D"
+                  "Value": "180D"
                 }
               }
             }
@@ -499,7 +499,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "45D"
+                  "Value": "39D"
                 }
               }
             }
@@ -513,7 +513,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "57D"
+                  "Value": "54D"
                 }
               }
             }
@@ -527,7 +527,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "57D"
+                  "Value": "54D"
                 }
               }
             }

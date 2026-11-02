@@ -1,12 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "4ff23ce61eadf9c5a5db",
+  "name": "c7e03dc6ef5ee01fde24",
   "position": {
-    "x": 24,
-    "y": 14,
+    "x": 0,
+    "y": 0,
     "z": 0,
-    "height": 56,
-    "width": 640,
+    "height": 72,
+    "width": 1280,
     "tabOrder": 0
   },
   "visual": {
@@ -19,11 +19,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "Temporada",
+                    "value": "Partidos",
                     "textStyle": {
                       "fontFamily": "Segoe UI Semibold",
                       "fontSize": "20pt",
-                      "color": "#16181D"
+                      "color": "#FFFFFF"
                     }
                   }
                 ],
@@ -32,11 +32,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "FC Barcelona · resultados, puntos y clasificación",
+                    "value": "Resultados, local contra visitante y forma reciente",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "10pt",
-                      "color": "#6D7178"
+                      "color": "#C9D8EE"
                     }
                   }
                 ],
@@ -67,7 +67,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -76,7 +76,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#004D98'"
                     }
                   }
                 }
@@ -98,7 +98,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -107,7 +107,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E6E2D9'"
+                      "Value": "'#004D98'"
                     }
                   }
                 }
@@ -116,7 +116,7 @@
             "radius": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "0D"
                 }
               }
             },
@@ -136,7 +136,7 @@
             "top": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "10D"
                 }
               }
             },
@@ -157,7 +157,7 @@
             "left": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
+                  "Value": "24D"
                 }
               }
             }

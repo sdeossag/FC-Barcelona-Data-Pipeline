@@ -77,17 +77,22 @@ def in_filter(table, prop, values, name):
     }
 
 
-def container(title=None, background=True, padding=None):
-    """Card chrome shared by every visual: white tile, hairline, 8 px radius."""
+def container(title=None, background=True, padding=None, fill=CARD, title_color=INK,
+              border=LINE, radius=8):
+    """Card chrome shared by every visual: white tile, hairline, 8 px radius.
+
+    `fill` and `title_color` turn a tile into a solid hero tile; `radius` 0 gives
+    the square corners a full-width band needs.
+    """
     objs = {
         "title": [{"properties": {"show": lit(bool(title)), **({
-            "text": lit(title), "fontColor": color(INK), "fontSize": lit(11),
+            "text": lit(title), "fontColor": color(title_color), "fontSize": lit(11),
             "fontFamily": lit("Segoe UI Semibold"), "alignment": lit("left"),
         } if title else {})}}],
-        "background": [{"properties": {"show": lit(background), "color": color(CARD),
+        "background": [{"properties": {"show": lit(background), "color": color(fill),
                                        "transparency": lit(0)}}],
-        "border": [{"properties": {"show": lit(background), "color": color(LINE),
-                                   "radius": lit(8), "width": lit(1)}}],
+        "border": [{"properties": {"show": lit(background), "color": color(border),
+                                   "radius": lit(radius), "width": lit(1)}}],
     }
     if padding is not None:
         t, r, b, l = padding
