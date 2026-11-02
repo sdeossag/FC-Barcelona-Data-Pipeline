@@ -122,6 +122,7 @@ cd powerbi/tools
 python build_all.py        # regenerate the five pages
 python validate_pbir.py ../barca_dashboard.Report/definition/pages/<page id>   # check against Microsoft's JSON schema
 python check_fields.py     # every field a visual uses must exist in the model
+python export_screenshots.py <report.pdf>   # File > Export > Export to PDF in Power BI, then crop to PNGs
 ```
 
 ### Tests
