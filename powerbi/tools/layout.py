@@ -47,6 +47,10 @@ def header(page, title, subtitle):
             "visualType": "slicer",
             "query": {"queryState": {"Values": {"projections": [projection(col(DIM, prop), True)]}}},
             "objects": {
+                # A slicer keeps its selection in general.filter. A filterConfig
+                # filter would instead filter the slicer's own list.
+                "general": [{"properties": {"filter": {"filter": in_filter(
+                    DIM, prop, [default], "sel")["filter"]}}}],
                 "data": [{"properties": {"mode": lit("Dropdown")}}],
                 "selection": [{"properties": {"singleSelect": lit(True),
                                               "selectAllCheckboxEnabled": lit(False)}}],
@@ -56,8 +60,6 @@ def header(page, title, subtitle):
             "visualContainerObjects": container(padding=(0, 6, 0, 6)),
             "drillFilterOtherVisuals": True,
         },
-            # The saved selection is what opens the report on La Liga 2025/26.
-            filters=[in_filter(DIM, prop, [default], f"f_{key}")],
             sync_group={"groupName": group, "fieldChanges": True, "filterChanges": True})
 
     slicer("slicer_comp", 1280 - M - 200 - G - 200, "Competición", "'La Liga'", "competicion")

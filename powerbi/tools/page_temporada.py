@@ -14,6 +14,16 @@ SUMMARY = "warehouse vw_team_season_summary"
 MATCHES = "warehouse vw_barca_matches"
 
 
+# Clubs that have appeared among the six best sides of a selected season.
+RIVALS = [
+    "Arsenal FC", "Aston Villa FC", "Athletic Club", "Bayer 04 Leverkusen", "Chelsea FC",
+    "Club Atlético de Madrid", "FC Bayern München", "FC Internazionale Milano", "Girona FC",
+    "Liverpool FC", "Paris Saint-Germain FC", "RC Celta de Vigo", "Real Betis Balompié",
+    "Real Madrid CF", "Real Sociedad de Fútbol", "Sevilla FC", "Tottenham Hotspur FC",
+    "VfB Stuttgart", "Villarreal CF",
+]
+
+
 def team_selector(team):
     """Selects one series of a chart by team name."""
     return {"data": [{"scopeId": {"Comparison": {
@@ -46,8 +56,10 @@ page.add("race", M, mid_y, race_w, mid_h, {
         # A selector-less entry is the default for every series, so rivals stay
         # neutral grey whichever teams the season produces. Barcelona is the
         # only series named, which keeps the colour meaningful.
+        # Power BI has no default series colour, so every club that has been a
+        # direct rival gets the neutral grey by name. Barcelona is blue.
         "dataPoint": [
-            {"properties": {"fill": color(RIVAL)}},
+            *[{"properties": {"fill": color(RIVAL)}, "selector": team_selector(t)} for t in RIVALS],
             {"properties": {"fill": color(BLUE)}, "selector": team_selector("FC Barcelona")},
         ],
         "lineStyles": [
