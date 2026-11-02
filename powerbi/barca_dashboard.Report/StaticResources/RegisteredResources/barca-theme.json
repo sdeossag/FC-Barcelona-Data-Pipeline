@@ -177,7 +177,7 @@
             },
             "backColor": {
               "solid": {
-                "color": "#F5F3EE"
+                "color": "#182847"
               }
             },
             "fontFamily": "Segoe UI Semibold",
@@ -245,7 +245,7 @@
           {
             "color": {
               "solid": {
-                "color": "#F5F3EE"
+                "color": "#182847"
               }
             },
             "transparency": 0
@@ -255,7 +255,7 @@
           {
             "color": {
               "solid": {
-                "color": "#F5F3EE"
+                "color": "#182847"
               }
             },
             "transparency": 0
