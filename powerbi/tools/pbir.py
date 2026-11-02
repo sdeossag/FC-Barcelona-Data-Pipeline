@@ -46,7 +46,7 @@ def meas(prop, table="Medidas"):
     return {"Measure": {"Expression": {"SourceRef": {"Entity": table}}, "Property": prop}}
 
 
-def projection(field, active=False):
+def projection(field, active=False, display=None):
     kind = "Measure" if "Measure" in field else "Column"
     inner = field[kind]
     entity = inner["Expression"]["SourceRef"]["Entity"]
@@ -54,6 +54,8 @@ def projection(field, active=False):
     out = {"field": field, "queryRef": f"{entity}.{prop}", "nativeQueryRef": prop}
     if active:
         out["active"] = True
+    if display:
+        out["displayName"] = display
     return out
 
 

@@ -74,14 +74,22 @@ page.add("race", M, mid_y, race_w, mid_h, {
     in_filter(RACE, "Fase de liga", ["true"], "f_liga"),
 ])
 
-data_table(page, "standings", M + race_w + G, mid_y, W - race_w - G, mid_h, "Tabla de posiciones", [
-    meas("Posición"), col(SUMMARY, "Equipo"), col(SUMMARY, "PJ"),
-    col(SUMMARY, "DG"), col(SUMMARY, "Pts"),
-], col(SUMMARY, "Pts"), styled=[(f"{SUMMARY}.Equipo", "Color equipo", "Fondo equipo")])
+# The standings run the full height of the right column so all 20 clubs fit
+# without scrolling. Rows come from measures, not from the PJ/DG/Pts columns:
+# grouping by those columns made rows from other seasons appear.
+data_table(page, "standings", M + race_w + G, mid_y, W - race_w - G, 720 - 16 - mid_y,
+           "Tabla de posiciones", [
+    (meas("Posición"), "#"), col(SUMMARY, "Equipo"), (meas("PJ tabla"), "PJ"),
+    (meas("DG tabla"), "DG"), (meas("Puntos tabla"), "Pts"),
+], meas("Puntos tabla"), widths=[0.1, 0.48, 0.12, 0.15, 0.15],
+    # Highlight Barcelona's whole row, not just the name cell.
+    styled=[(ref, "Color equipo", "Fondo equipo") for ref in (
+        "Medidas.Posición", f"{SUMMARY}.Equipo", "Medidas.PJ tabla",
+        "Medidas.DG tabla", "Medidas.Puntos tabla")])
 
-# ---- Bottom row: goals for and against by matchday ------------------------
+# ---- Bottom left: goals for and against by matchday -----------------------
 bot_y = mid_y + mid_h + G
-page.add("goals", M, bot_y, W, 720 - 16 - bot_y, {
+page.add("goals", M, bot_y, race_w, 720 - 16 - bot_y, {
     "visualType": "clusteredColumnChart",
     "query": {"queryState": {
         "Category": {"projections": [projection(col(MATCHES, "Jornada"), True)]},

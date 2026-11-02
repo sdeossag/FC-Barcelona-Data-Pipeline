@@ -25,15 +25,16 @@ y = kpi_row(page, [
 mid_y, mid_h = y + G, 200
 form_w = span(4)
 data_table(page, "form", M, mid_y, form_w, mid_h, "Forma reciente: últimos 5", [
-    col(FORM, "Resultado"), col(FORM, "Rival"), col(FORM, "Sede"), col(FORM, "Marcador"),
-], col(FORM, "Recencia"), "Ascending",
+    col(FORM, "Fecha"), col(FORM, "Resultado"), col(FORM, "Rival"), col(FORM, "Sede"),
+    col(FORM, "Marcador"),
+], col(FORM, "Fecha"), "Descending", widths=[0.2, 0.17, 0.33, 0.13, 0.17],
     styled=[(f"{FORM}.Resultado", "Color forma", None)])
 
 split_w = span(5)
 data_table(page, "home_away", M + form_w + G, mid_y, split_w, mid_h, "Casa contra fuera", [
     col(HOME_AWAY, "Sede"), col(HOME_AWAY, "PJ"), col(HOME_AWAY, "% Victorias"),
     col(HOME_AWAY, "GF/partido"), col(HOME_AWAY, "GC/partido"),
-], col(HOME_AWAY, "Sede"), "Ascending")
+], col(HOME_AWAY, "Sede"), "Ascending", widths=[0.2, 0.12, 0.24, 0.22, 0.22])
 
 bars_x = M + form_w + G + split_w + G
 page.add("win_rate", bars_x, mid_y, W - (bars_x - M), mid_h, {
@@ -57,7 +58,8 @@ res_y = mid_y + mid_h + G
 data_table(page, "results", M, res_y, W, 720 - 16 - res_y, "Resultados de la temporada", [
     col(MATCHES, "Fecha"), col(MATCHES, "Jornada"), col(MATCHES, "Rival"),
     col(MATCHES, "Sede"), col(MATCHES, "Marcador"), col(MATCHES, "Resultado"),
-], col(MATCHES, "Fecha"), styled=[(f"{MATCHES}.Resultado", "Color resultado", None)])
+], col(MATCHES, "Fecha"), widths=[0.12, 0.09, 0.3, 0.12, 0.14, 0.23],
+    styled=[(f"{MATCHES}.Resultado", "Color resultado", None)])
 
 page.write()
 page.set_canvas(CANVAS)

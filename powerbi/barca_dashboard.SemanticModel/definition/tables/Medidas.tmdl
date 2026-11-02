@@ -70,7 +70,15 @@ table Medidas
 		lineageTag: 3f397bd2-a7d5-4b13-9416-4d8df1a1ed1e
 		displayFolder: Clasificación
 
-	measure Posición = CALCULATE ( RANKX ( ALLSELECTED ( 'warehouse vw_team_season_summary'[Equipo] ), CALCULATE ( SUM ( 'warehouse vw_team_season_summary'[Pts] ) * 100000 + SUM ( 'warehouse vw_team_season_summary'[DG] ) * 100 + SUM ( 'warehouse vw_team_season_summary'[GF] ) ), , DESC, SKIP ), REMOVEFILTERS ( 'warehouse vw_team_season_summary'[PJ] ), REMOVEFILTERS ( 'warehouse vw_team_season_summary'[DG] ), REMOVEFILTERS ( 'warehouse vw_team_season_summary'[Pts] ) )
+	measure 'PJ tabla' = SUM ( 'warehouse vw_team_season_summary'[PJ] )
+		formatString: #,0
+		displayFolder: Clasificación
+
+	measure 'DG tabla' = SUM ( 'warehouse vw_team_season_summary'[DG] )
+		formatString: +#,##0;-#,##0;0
+		displayFolder: Clasificación
+
+	measure Posición = IF ( ISBLANK ( [Puntos tabla] ), BLANK (), RANKX ( ALLSELECTED ( 'warehouse vw_team_season_summary'[Equipo] ), [Puntos tabla] * 100000 + [DG tabla] * 100 + SUM ( 'warehouse vw_team_season_summary'[GF] ), , DESC, SKIP ) )
 		formatString: #,0
 		lineageTag: 2aa93e43-4e7f-4083-a006-671235978e6e
 		displayFolder: Clasificación

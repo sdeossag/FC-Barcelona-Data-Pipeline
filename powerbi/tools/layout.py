@@ -85,29 +85,46 @@ def kpi_row(page, items, y=HEADER_BOTTOM, h=88):
 
 
 def data_table(page, key, x, y, w, h, title, fields, sort_field, direction="Descending",
-               styled=()):
-    """A compact table. `styled` lists (column metadata, font measure, back measure)."""
-    values = [{"properties": {"fontColorPrimary": color(INK), "fontSize": lit(9)}}]
+               styled=(), widths=None):
+    """A compact table.
+
+    fields   fields to show; an item may be (field, display name).
+    styled   (column metadata, font measure, back measure) per coloured column.
+    widths   column widths as fractions of the table width. Without them a table
+             hugs the left edge and leaves the tile half empty.
+    The sort field must be one of the shown fields, or Power BI ignores it.
+    """
+    fields = [f if isinstance(f, tuple) else (f, None) for f in fields]
+    values = [{"properties": {"fontColorPrimary": color(INK), "fontSize": lit(10)}}]
     for metadata, font_measure, back_measure in styled:
         props = {"fontColor": measure_color(font_measure)}
         if back_measure:
             props["backColor"] = measure_color(back_measure)
         values.append({"properties": props, "selector": {
             "data": [{"dataViewWildcard": {"matchingOption": 1}}], "metadata": metadata}})
+    objects = {
+        "grid": [{"properties": {"rowPadding": lit(2), "outlineColor": color("#EEEBE3"),
+                                 "gridHorizontal": lit(True), "gridVertical": lit(False),
+                                 "textSize": lit(10)}}],
+        "columnHeaders": [{"properties": {"fontColor": color(MUTED), "fontSize": lit(10),
+                                          "fontFamily": lit("Segoe UI Semibold"),
+                                          "backColor": color("#FFFFFF")}}],
+        "values": values,
+        # A total row adds nothing to a list of matches or teams.
+        "total": [{"properties": {"totals": lit(False)}}],
+    }
+    if widths:
+        usable = w - 24
+        objects["columnWidth"] = [
+            {"properties": {"value": lit(round(usable * frac))},
+             "selector": {"metadata": projection(f)["queryRef"]}}
+            for (f, _), frac in zip(fields, widths)]
     return page.add(key, x, y, w, h, {
         "visualType": "tableEx",
         "query": {
-            "queryState": {"Values": {"projections": [projection(f) for f in fields]}},
+            "queryState": {"Values": {"projections": [projection(f, display=d) for f, d in fields]}},
             "sortDefinition": {"sort": [{"field": sort_field, "direction": direction}]},
         },
-        "objects": {
-            "grid": [{"properties": {"rowPadding": lit(2), "outlineColor": color("#EEEBE3"),
-                                     "gridHorizontal": lit(True), "gridVertical": lit(False),
-                                     "textSize": lit(9)}}],
-            "columnHeaders": [{"properties": {"fontColor": color(MUTED), "fontSize": lit(9),
-                                              "fontFamily": lit("Segoe UI Semibold"),
-                                              "backColor": color("#FFFFFF")}}],
-            "values": values,
-        },
+        "objects": objects,
         "visualContainerObjects": container(title, padding=(4, 8, 8, 8)),
     })
