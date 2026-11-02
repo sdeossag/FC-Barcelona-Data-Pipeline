@@ -342,7 +342,8 @@ SELECT
     team_name,
     -- An own goal is recorded against the team it benefits, so it counts here.
     COUNT(*) FILTER (WHERE event_type IN ('GOAL', 'OWN_GOAL')) AS goals,
-    COUNT(*) FILTER (WHERE event_type = 'SHOT')         AS shots,
+    -- A goal is a shot that went in, and ESPN lists goals apart from shots.
+    COUNT(*) FILTER (WHERE event_type IN ('SHOT', 'GOAL')) AS shots,
     COUNT(*) FILTER (WHERE event_type = 'YELLOW_CARD')  AS yellow_cards,
     COUNT(*) FILTER (WHERE event_type = 'RED_CARD')     AS red_cards,
     MAX(minute)                                         AS last_minute

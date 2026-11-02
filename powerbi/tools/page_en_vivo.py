@@ -27,7 +27,7 @@ y = kpi_row(page, [
     ("Marcador", "Marcador en vivo", INK, "hero"),
     ("Rival", "Rival en vivo", INK),
     ("Eventos", "Eventos procesados", INK),
-    ("Latencia (ms)", "Latencia media (ms)", INK),
+    ("Latencia (ms)", "Latencia mediana (ms)", INK),
 ], x0=M, total_w=half, prefix="live")
 
 top_h = 170
@@ -40,7 +40,7 @@ ev_y = y + G + top_h + G
 data_table(page, "live_events", M, ev_y, half, 720 - 16 - ev_y, "Eventos recibidos por Kafka", [
     col(EVENTS, "Minuto"), col(EVENTS, "Evento"), col(EVENTS, "Jugador"),
     col(EVENTS, "Equipo"), col(EVENTS, "Detalle"),
-], col(EVENTS, "Minuto"), widths=[0.08, 0.2, 0.25, 0.14, 0.33], row_padding=1)
+], col(EVENTS, "Minuto"), widths=[0.1, 0.19, 0.24, 0.14, 0.33], row_padding=1)
 
 # ---- Right: prediction layer ----------------------------------------------
 kpi_row(page, [

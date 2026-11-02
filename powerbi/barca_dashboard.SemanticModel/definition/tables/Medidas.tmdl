@@ -203,7 +203,7 @@ table Medidas
 		lineageTag: 19092ca3-d981-4c72-9ef5-64cb98a53f41
 		displayFolder: En vivo
 
-	measure 'Latencia media (ms)' = AVERAGE ( 'warehouse vw_live_events_current'[Latencia (ms)] )
+	measure 'Latencia mediana (ms)' = MEDIAN ( 'warehouse vw_live_events_current'[Latencia (ms)] )
 		formatString: #,0
 		lineageTag: ac7e624a-5225-4908-8ff4-7460d0b41c73
 		displayFolder: En vivo

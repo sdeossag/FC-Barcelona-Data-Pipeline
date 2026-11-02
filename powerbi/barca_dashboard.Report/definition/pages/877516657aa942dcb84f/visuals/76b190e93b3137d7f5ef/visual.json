@@ -23,11 +23,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Latencia media (ms)"
+                  "Property": "Latencia mediana (ms)"
                 }
               },
-              "queryRef": "Medidas.Latencia media (ms)",
-              "nativeQueryRef": "Latencia media (ms)"
+              "queryRef": "Medidas.Latencia mediana (ms)",
+              "nativeQueryRef": "Latencia mediana (ms)"
             }
           ]
         }
