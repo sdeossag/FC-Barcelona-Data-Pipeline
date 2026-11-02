@@ -26,7 +26,7 @@ mid_y, mid_h = y + G, 250
 table_w = span(7)
 data_table(page, "freshness", M, mid_y, table_w, mid_h, "Frescura por tabla", [
     col(HEALTH, "Tabla"), col(HEALTH, "Origen"), col(HEALTH, "Filas"),
-    (col(HEALTH, "Horas"), "Horas desde la carga"), col(HEALTH, "Estado"),
+    (col(HEALTH, "Horas"), "Horas"), col(HEALTH, "Estado"),
 ], col(HEALTH, "Horas"), "Ascending", widths=[0.24, 0.24, 0.14, 0.2, 0.18], row_padding=1,
     styled=[(f"{HEALTH}.Estado", "Color estado", None)])
 

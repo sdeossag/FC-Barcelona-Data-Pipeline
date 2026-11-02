@@ -70,7 +70,7 @@
               },
               "queryRef": "warehouse vw_pipeline_health.Horas",
               "nativeQueryRef": "Horas",
-              "displayName": "Horas desde la carga"
+              "displayName": "Horas"
             },
             {
               "field": {

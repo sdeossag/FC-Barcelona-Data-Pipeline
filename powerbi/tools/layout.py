@@ -51,7 +51,7 @@ def header(page, title, subtitle, slicers=True):
         page.add(f"stripe{i}", i * 160, BAND_H, 160, 5, {
             "visualType": "textbox",
             "objects": {"general": [{"properties": {"paragraphs": [
-                {"textRuns": [{"value": " ", "textStyle": {"fontSize": "1pt"}}]}]}}]},
+                {"textRuns": [{"value": "", "textStyle": {"fontSize": "1pt"}}]}]}}]},
             "visualContainerObjects": container(fill=stripe_color, border=stripe_color,
                                                 radius=0, padding=(0, 0, 0, 0)),
         })
@@ -82,7 +82,7 @@ def header(page, title, subtitle, slicers=True):
     slicer("slicer_season", 1280 - M - 200, "Temporada", "'2026/27'", "temporada")
 
 
-def kpi_row(page, items, y=HEADER_BOTTOM, h=88, x0=M, total_w=W, prefix="kpi"):
+def kpi_row(page, items, y=HEADER_BOTTOM, h=88, x0=M, total_w=W, prefix="kpi", font=26):
     """Equal tiles. items: (label, measure, value colour[, 'hero']).
 
     A hero tile is solid blue with white text: one per page, the number that
@@ -96,7 +96,7 @@ def kpi_row(page, items, y=HEADER_BOTTOM, h=88, x0=M, total_w=W, prefix="kpi"):
             "visualType": "card",
             "query": {"queryState": {"Values": {"projections": [projection(meas(measure))]}}},
             "objects": {
-                "labels": [{"properties": {"fontSize": lit(26), "fontFamily": lit("Segoe UI Semibold"),
+                "labels": [{"properties": {"fontSize": lit(font), "fontFamily": lit("Segoe UI Semibold"),
                                            "color": color("#FFFFFF" if hero else value_color)}}],
                 "categoryLabels": [{"properties": {"show": lit(False)}}],
                 "wordWrap": [{"properties": {"show": lit(False)}}],

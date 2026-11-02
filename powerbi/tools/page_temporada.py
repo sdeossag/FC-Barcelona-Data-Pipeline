@@ -70,7 +70,7 @@ page.add("race", M, mid_y, race_w, mid_h, {
     "visualContainerObjects": container("Carrera por el título: puntos acumulados por jornada",
                                         padding=(4, 12, 8, 8)),
 }, filters=[
-    in_filter(RACE, "Rival directo", ["true"], "f_rival"),
+    in_filter(RACE, "Visible", ["true"], "f_rival"),
     in_filter(RACE, "Fase de liga", ["true"], "f_liga"),
 ])
 

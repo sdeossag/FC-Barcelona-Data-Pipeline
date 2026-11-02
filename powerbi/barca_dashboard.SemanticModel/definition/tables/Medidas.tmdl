@@ -259,7 +259,7 @@ table Medidas
 		isHidden
 		displayFolder: Formato
 
-	measure 'Goleador del Barça' = VAR t = TOPN ( 1, FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles], DESC ) RETURN COALESCE ( MAXX ( t, 'warehouse vw_top_scorers'[Jugador] ), "Sin datos" )
+	measure 'Goleador del Barça' = VAR t = TOPN ( 1, FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles], DESC ) RETURN COALESCE ( MAXX ( t, 'warehouse vw_top_scorers'[Jugador] ), "Fuera del top 10" )
 		displayFolder: Jugadores
 
 	measure 'Goles del goleador' = COALESCE ( MAXX ( FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles] ), 0 )

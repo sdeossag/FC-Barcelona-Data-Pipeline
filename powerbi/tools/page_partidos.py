@@ -27,7 +27,7 @@ form_w = span(5)
 data_table(page, "form", M, mid_y, form_w, mid_h, "Forma reciente: últimos 5", [
     col(FORM, "Fecha"), col(FORM, "Resultado"), col(FORM, "Rival"), col(FORM, "Sede"),
     col(FORM, "Marcador"),
-], col(FORM, "Fecha"), "Descending", widths=[0.22, 0.18, 0.3, 0.12, 0.18],
+], col(FORM, "Fecha"), "Descending", widths=[0.19, 0.14, 0.4, 0.1, 0.17],
     styled=[(f"{FORM}.Resultado", "Color forma", None)])
 
 split_w = span(4)

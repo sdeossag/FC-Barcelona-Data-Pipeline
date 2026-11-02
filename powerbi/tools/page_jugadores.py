@@ -26,7 +26,7 @@ bars_w = span(5)
 # Two series instead of one coloured by a measure: Barcelona's players are blue
 # and everyone else grey, which Power BI applies reliably. The total goals sit in
 # the tooltip so the bars can still be sorted by it.
-chart(page, "scorers_bars", M, mid_y, bars_w, mid_h, "Máximos goleadores", "stackedBarChart",
+chart(page, "scorers_bars", M, mid_y, bars_w, mid_h, "Máximos goleadores", "barChart",
       col(SCORERS, "Jugador"), [meas("Goles (Barça)"), meas("Goles (resto)")],
       colors={"Goles (Barça)": BLUE, "Goles (resto)": RIVAL}, labels=True, hide_value_axis=True,
       tooltips=[meas("Goles jugador")], sort=(meas("Goles jugador"), "Descending"))

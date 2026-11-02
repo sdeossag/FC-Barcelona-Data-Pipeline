@@ -1287,7 +1287,7 @@
                 "Entity": "warehouse vw_title_race"
               }
             },
-            "Property": "Rival directo"
+            "Property": "Visible"
           }
         },
         "type": "Categorical",
@@ -1312,7 +1312,7 @@
                             "Source": "t"
                           }
                         },
-                        "Property": "Rival directo"
+                        "Property": "Visible"
                       }
                     }
                   ],

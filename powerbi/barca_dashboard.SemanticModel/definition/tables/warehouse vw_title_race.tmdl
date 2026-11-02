@@ -120,6 +120,12 @@ table 'warehouse vw_title_race'
 
 		annotation SummarizationSetBy = Automatic
 
+	column Visible = 'warehouse vw_title_race'[Rival directo] || 'warehouse vw_title_race'[Barça]
+		dataType: boolean
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'warehouse vw_title_race' = m
 		mode: import
 		source =
