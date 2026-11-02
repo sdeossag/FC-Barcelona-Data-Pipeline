@@ -49,3 +49,4 @@ relationship b16bac11-b3ee-4660-9ce1-6c5c8020e621
 	joinOnDateBehavior: datePartOnly
 	fromColumn: 'warehouse vw_title_probability_history'.Fecha
 	toColumn: 'warehouse vw_dim_date'.Fecha
+

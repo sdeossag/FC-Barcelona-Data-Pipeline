@@ -1,32 +1,7 @@
 table 'warehouse vw_top_scorers'
 	lineageTag: 5083c811-e3b5-4d72-9892-b0740d8e7d60
 
-	column 'comp_season_key'
-		dataType: string
-		isHidden
-		lineageTag: aafbd727-cb76-40df-8b9c-fae3822d8abc
-		summarizeBy: none
-		sourceColumn: comp_season_key
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Competición'
-		dataType: string
-		lineageTag: 4b1ce8aa-30c3-4472-93ec-bcbc9b82a7f4
-		summarizeBy: none
-		sourceColumn: competition
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Temporada'
-		dataType: int64
-		lineageTag: a112b24a-b4eb-4ed6-bbcb-921323eb01ed
-		summarizeBy: sum
-		sourceColumn: season
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'player_id'
+	column player_id
 		dataType: int64
 		isHidden
 		lineageTag: c3cb7ac6-d71a-4fca-b652-b22a10434172
@@ -35,15 +10,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Jugador'
-		dataType: string
-		lineageTag: 8c74df81-e28a-4d30-9f99-0cfb8f839896
-		summarizeBy: none
-		sourceColumn: player_name
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'team_id'
+	column team_id
 		dataType: int64
 		isHidden
 		lineageTag: 00fef9c2-7eb4-4c29-89e8-62839c9704d4
@@ -52,7 +19,40 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Equipo'
+	column comp_season_key
+		dataType: string
+		isHidden
+		lineageTag: aafbd727-cb76-40df-8b9c-fae3822d8abc
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Competición
+		dataType: string
+		lineageTag: 4b1ce8aa-30c3-4472-93ec-bcbc9b82a7f4
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column Temporada
+		dataType: int64
+		lineageTag: a112b24a-b4eb-4ed6-bbcb-921323eb01ed
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column Jugador
+		dataType: string
+		lineageTag: 8c74df81-e28a-4d30-9f99-0cfb8f839896
+		summarizeBy: none
+		sourceColumn: player_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
 		dataType: string
 		lineageTag: 5da6108e-5809-45d3-bd11-edabcb20642b
 		summarizeBy: none
@@ -60,7 +60,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Barça'
+	column Barça
 		dataType: boolean
 		isHidden
 		lineageTag: b4b0f3fd-26f8-4c2e-a803-decf7b69a010
@@ -69,7 +69,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Goles'
+	column Goles
 		dataType: int64
 		formatString: #,0
 		lineageTag: 80635f73-0e77-471a-ae35-b6dab8abd09b
@@ -78,7 +78,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Asistencias'
+	column Asistencias
 		dataType: int64
 		formatString: #,0
 		lineageTag: 7c046312-75f9-4bd7-ae88-319a9d42d9d3
@@ -87,7 +87,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Penaltis'
+	column Penaltis
 		dataType: int64
 		lineageTag: b9e68b11-606d-48df-958c-decb14f8d7b3
 		summarizeBy: sum
@@ -103,7 +103,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Posición'
+	column Posición
 		dataType: int64
 		formatString: #,0
 		lineageTag: 14ded392-e209-48b3-9c84-863c28c1709e
@@ -112,7 +112,7 @@ table 'warehouse vw_top_scorers'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'G+A' = 'warehouse vw_top_scorers'[Goles] + 'warehouse vw_top_scorers'[Asistencias]
+	column G+A = 'warehouse vw_top_scorers'[Goles] + 'warehouse vw_top_scorers'[Asistencias]
 		dataType: int64
 		formatString: #,0
 		lineageTag: c4b8d1f5-2a67-4e93-8d0b-6f5e3a91c7d2
@@ -128,3 +128,4 @@ table 'warehouse vw_top_scorers'
 				    vw_top_scorers = Origen{[Schema="warehouse",Item="vw_top_scorers"]}[Data]
 				in
 				    vw_top_scorers
+

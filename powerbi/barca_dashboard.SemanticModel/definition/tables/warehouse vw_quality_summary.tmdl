@@ -1,7 +1,7 @@
 table 'warehouse vw_quality_summary'
 	lineageTag: 32724f9a-423a-41e0-b392-99b63f0d4329
 
-	column 'run_id'
+	column run_id
 		dataType: string
 		isHidden
 		lineageTag: 9d5cf72b-a7e2-4fac-a3a3-fc9e67e8d6b3
@@ -10,7 +10,7 @@ table 'warehouse vw_quality_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fecha'
+	column Fecha
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
 		lineageTag: e70f0564-4e93-4668-b12a-caa718779861
@@ -19,7 +19,7 @@ table 'warehouse vw_quality_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Controles'
+	column Controles
 		dataType: int64
 		formatString: #,0
 		lineageTag: f2ab7184-e416-4678-ab2f-a1cef71e51f3
@@ -28,7 +28,7 @@ table 'warehouse vw_quality_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Superados'
+	column Superados
 		dataType: int64
 		formatString: #,0
 		lineageTag: d9b7aa24-def9-47a1-a961-a2c39c8c5a46
@@ -37,7 +37,7 @@ table 'warehouse vw_quality_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fallidos'
+	column Fallidos
 		dataType: int64
 		formatString: #,0
 		lineageTag: 57ae070d-d072-46b0-a591-2031ac1f9690
@@ -63,3 +63,4 @@ table 'warehouse vw_quality_summary'
 				    vw_quality_summary = Origen{[Schema="warehouse",Item="vw_quality_summary"]}[Data]
 				in
 				    vw_quality_summary
+

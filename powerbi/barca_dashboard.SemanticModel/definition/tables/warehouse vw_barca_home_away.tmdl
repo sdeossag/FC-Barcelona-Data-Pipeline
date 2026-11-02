@@ -1,7 +1,7 @@
 table 'warehouse vw_barca_home_away'
 	lineageTag: a3bee784-d9e8-4c37-a573-a716dcd86a91
 
-	column 'comp_season_key'
+	column comp_season_key
 		dataType: string
 		isHidden
 		lineageTag: 59ab3675-9489-4fb6-88e7-612832667968
@@ -10,7 +10,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Competición'
+	column Competición
 		dataType: string
 		lineageTag: 72d68690-ea88-4a9d-a578-fcb09ca9b030
 		summarizeBy: none
@@ -18,7 +18,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Temporada'
+	column Temporada
 		dataType: int64
 		lineageTag: c09dfac6-0b0f-433e-b9cc-c9e4a212aa52
 		summarizeBy: sum
@@ -26,7 +26,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Sede'
+	column Sede
 		dataType: string
 		lineageTag: 33bf0bd7-f11b-4fa1-99c7-b23878aff37c
 		summarizeBy: none
@@ -34,7 +34,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'PJ'
+	column PJ
 		dataType: int64
 		formatString: #,0
 		lineageTag: 488a48ab-fcf3-4d7a-8c93-52e9a4eb7d99
@@ -43,7 +43,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Victorias'
+	column Victorias
 		dataType: int64
 		formatString: #,0
 		lineageTag: a763fc29-c968-4390-8161-6d97abf2f589
@@ -52,7 +52,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Empates'
+	column Empates
 		dataType: int64
 		formatString: #,0
 		lineageTag: b503b29f-d516-4b17-a7a5-bc8e5514df0d
@@ -61,7 +61,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Derrotas'
+	column Derrotas
 		dataType: int64
 		formatString: #,0
 		lineageTag: b943d685-c9b8-4d7b-9719-f4a0d132f5c0
@@ -88,7 +88,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GF/partido'
+	column GF/partido
 		dataType: double
 		formatString: 0.00
 		lineageTag: 674e6055-e52f-4e78-aa7f-66063927343d
@@ -97,7 +97,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GC/partido'
+	column GC/partido
 		dataType: double
 		formatString: 0.00
 		lineageTag: 47c24f08-bd9e-4560-b911-160f2ddf3cec
@@ -115,7 +115,7 @@ table 'warehouse vw_barca_home_away'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Puntos'
+	column Puntos
 		dataType: int64
 		formatString: #,0
 		lineageTag: fca87d3c-3410-40c1-9d33-314b8db3544e
@@ -132,3 +132,4 @@ table 'warehouse vw_barca_home_away'
 				    vw_barca_home_away = Origen{[Schema="warehouse",Item="vw_barca_home_away"]}[Data]
 				in
 				    vw_barca_home_away
+

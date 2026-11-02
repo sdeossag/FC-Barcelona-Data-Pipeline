@@ -1,7 +1,7 @@
 table 'warehouse vw_team_season_summary'
 	lineageTag: 86c6181b-aab7-41fe-8a03-0d1e5cd3af66
 
-	column 'comp_season_key'
+	column comp_season_key
 		dataType: string
 		isHidden
 		lineageTag: 764f48a1-c663-43e8-94e7-0c113082cc44
@@ -10,7 +10,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Competición'
+	column Competición
 		dataType: string
 		lineageTag: 78ba8aa6-70dd-48d8-8cc3-72d19f234927
 		summarizeBy: none
@@ -18,7 +18,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Temporada'
+	column Temporada
 		dataType: int64
 		lineageTag: 77e71fae-9b2b-4706-a98b-a999704b1553
 		summarizeBy: sum
@@ -26,7 +26,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'team_id'
+	column team_id
 		dataType: int64
 		isHidden
 		lineageTag: c875b8a6-7da1-4d16-bf8c-a6256c5e263e
@@ -35,7 +35,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Equipo'
+	column Equipo
 		dataType: string
 		lineageTag: f249aa3e-43bb-4fd9-ba85-4a7b50b324ef
 		summarizeBy: none
@@ -43,7 +43,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Barça'
+	column Barça
 		dataType: boolean
 		isHidden
 		lineageTag: 95d93aa7-8df0-4cc6-be0f-4a138c640c06
@@ -52,7 +52,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'PJ'
+	column PJ
 		dataType: int64
 		formatString: #,0
 		lineageTag: 0bacefbe-d682-4bd0-83ac-fe4e605d04c7
@@ -61,7 +61,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GF'
+	column GF
 		dataType: int64
 		formatString: #,0
 		lineageTag: 04345972-9ac3-4c66-aa9b-36127226ed0a
@@ -70,7 +70,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GC'
+	column GC
 		dataType: int64
 		formatString: #,0
 		lineageTag: ec63bf16-03d2-4c3e-bda0-bbca362ae1c9
@@ -79,7 +79,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'DG'
+	column DG
 		dataType: int64
 		formatString: #,0
 		lineageTag: d02891d9-519e-482e-8b19-e2b9808fef89
@@ -88,7 +88,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GF/partido'
+	column GF/partido
 		dataType: double
 		formatString: 0.00
 		lineageTag: 7dc74286-252c-473c-8a61-062838ab9ccd
@@ -97,7 +97,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GC/partido'
+	column GC/partido
 		dataType: double
 		formatString: 0.00
 		lineageTag: 7578731f-b645-4265-92f9-53a0aeb8c8c2
@@ -106,7 +106,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'V'
+	column V
 		dataType: int64
 		formatString: #,0
 		lineageTag: 46c370d8-a64e-4bbc-b3ed-92bf43f18950
@@ -115,7 +115,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'E'
+	column E
 		dataType: int64
 		formatString: #,0
 		lineageTag: d683fb26-dde8-4c6a-9890-6a2ec5ac5fd0
@@ -124,7 +124,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'D'
+	column D
 		dataType: int64
 		formatString: #,0
 		lineageTag: 55294669-0d7f-446a-9d51-aebad49a4b78
@@ -133,7 +133,7 @@ table 'warehouse vw_team_season_summary'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Pts'
+	column Pts
 		dataType: int64
 		formatString: #,0
 		lineageTag: 87877cb0-2ebb-4194-be0d-c7c25469bb0d
@@ -166,3 +166,4 @@ table 'warehouse vw_team_season_summary'
 				    vw_team_season_summary = Origen{[Schema="warehouse",Item="vw_team_season_summary"]}[Data]
 				in
 				    vw_team_season_summary
+

@@ -1,7 +1,7 @@
 table 'warehouse vw_barca_goals_by_interval'
 	lineageTag: 16f1b235-cfbc-4151-9525-de35a79c1080
 
-	column 'Orden'
+	column Orden
 		dataType: int64
 		isHidden
 		lineageTag: 31e213d2-4e6b-40b6-8fde-4abeab637fad
@@ -10,7 +10,7 @@ table 'warehouse vw_barca_goals_by_interval'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Tramo'
+	column Tramo
 		dataType: string
 		lineageTag: 07118032-574a-464c-b34b-65de2f26756d
 		summarizeBy: none
@@ -19,7 +19,7 @@ table 'warehouse vw_barca_goals_by_interval'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GF'
+	column GF
 		dataType: int64
 		formatString: #,0
 		lineageTag: 8621e04d-3f6d-4b9a-bec4-32936ce70db5
@@ -28,7 +28,7 @@ table 'warehouse vw_barca_goals_by_interval'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'GC'
+	column GC
 		dataType: int64
 		formatString: #,0
 		lineageTag: a84e333a-dde8-4cf7-a08c-91b87f439164
@@ -45,3 +45,4 @@ table 'warehouse vw_barca_goals_by_interval'
 				    vw_barca_goals_by_interval = Origen{[Schema="warehouse",Item="vw_barca_goals_by_interval"]}[Data]
 				in
 				    vw_barca_goals_by_interval
+

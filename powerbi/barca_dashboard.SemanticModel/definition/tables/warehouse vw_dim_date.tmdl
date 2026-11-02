@@ -1,8 +1,8 @@
 table 'warehouse vw_dim_date'
-	dataCategory: Time
 	lineageTag: 581ca1ce-e8ae-4345-8867-66c5d65d2fbf
+	dataCategory: Time
 
-	column 'Fecha'
+	column Fecha
 		dataType: dateTime
 		isKey
 		formatString: dd/MM/yyyy
@@ -12,7 +12,9 @@ table 'warehouse vw_dim_date'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Año'
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Año
 		dataType: int64
 		lineageTag: 1cfc78c2-6d48-4f15-aafc-4afd079fe44f
 		summarizeBy: none
@@ -20,7 +22,7 @@ table 'warehouse vw_dim_date'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Mes'
+	column Mes
 		dataType: int64
 		lineageTag: b35a048a-8a15-478a-b002-8c3c0df322db
 		summarizeBy: none
@@ -37,7 +39,7 @@ table 'warehouse vw_dim_date'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Trimestre'
+	column Trimestre
 		dataType: int64
 		lineageTag: 820d70c2-ff9d-45b5-84ff-425450bab9c8
 		summarizeBy: none
@@ -45,7 +47,7 @@ table 'warehouse vw_dim_date'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Año-mes'
+	column Año-mes
 		dataType: string
 		lineageTag: 956dfdf3-52b9-4624-8c19-61b66b8b86b1
 		summarizeBy: none
@@ -69,7 +71,7 @@ table 'warehouse vw_dim_date'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Día'
+	column Día
 		dataType: int64
 		lineageTag: 8a997e08-ad2d-4790-b858-d3de5272beca
 		summarizeBy: none
@@ -102,3 +104,4 @@ table 'warehouse vw_dim_date'
 				    vw_dim_date = Origen{[Schema="warehouse",Item="vw_dim_date"]}[Data]
 				in
 				    vw_dim_date
+

@@ -1,7 +1,7 @@
 table 'warehouse vw_live_events_current'
 	lineageTag: 907e16a7-3514-492b-8970-0e04952cebad
 
-	column 'event_id'
+	column event_id
 		dataType: string
 		isHidden
 		lineageTag: 16e0c82b-b9fe-4443-a8f3-d7f88f6b43fd
@@ -10,7 +10,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'match_id'
+	column match_id
 		dataType: int64
 		isHidden
 		lineageTag: 2bfd1ed9-155f-4c0c-b8f8-d8ba2f90123c
@@ -19,7 +19,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Periodo'
+	column Periodo
 		dataType: int64
 		lineageTag: bfdfc7af-67ab-4246-9a01-fff0bf75c86f
 		summarizeBy: none
@@ -27,7 +27,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Minuto'
+	column Minuto
 		dataType: int64
 		lineageTag: 8db32cdb-a744-4061-895d-26c2c850e27f
 		summarizeBy: none
@@ -35,7 +35,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Segundo'
+	column Segundo
 		dataType: int64
 		lineageTag: 6155bc29-0dbe-4b6b-8e17-1010de1bbf90
 		summarizeBy: none
@@ -52,7 +52,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Evento'
+	column Evento
 		dataType: string
 		lineageTag: 9b1e4c72-3d68-4f07-a5b9-7e2c6d8f31a0
 		summarizeBy: none
@@ -60,7 +60,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Jugador'
+	column Jugador
 		dataType: string
 		lineageTag: e73b5287-db30-4b11-a7fc-7195a5d1ba15
 		summarizeBy: none
@@ -68,7 +68,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Equipo'
+	column Equipo
 		dataType: string
 		lineageTag: 844b07d8-8dcd-4dd4-97a6-150e9b779135
 		summarizeBy: none
@@ -76,7 +76,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'xG'
+	column xG
 		dataType: double
 		formatString: 0.00
 		lineageTag: ac9d4b69-f1e1-46cd-9e8e-16e6ea3b8d6e
@@ -101,7 +101,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Sustituye'
+	column Sustituye
 		dataType: string
 		lineageTag: ae034c61-da1b-4c11-8e44-7390b45e2181
 		summarizeBy: none
@@ -109,7 +109,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Momento'
+	column Momento
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
 		lineageTag: 77ddaedb-868c-407d-93ef-2864f04298a8
@@ -118,7 +118,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Ingerido'
+	column Ingerido
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
 		lineageTag: fd14cfd0-9938-48d3-ab11-b4239c863a49
@@ -136,7 +136,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Asistencia'
+	column Asistencia
 		dataType: string
 		lineageTag: 64a96d34-9b68-4e9e-aba0-6a3f50ad68f8
 		summarizeBy: none
@@ -144,7 +144,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Descripción'
+	column Descripción
 		dataType: string
 		lineageTag: 9047d8ae-9b92-4d84-9b51-c97924c1bf1a
 		summarizeBy: none
@@ -152,7 +152,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fuente'
+	column Fuente
 		dataType: string
 		lineageTag: b9c47ebf-a432-42c3-bd40-191c68c1e9fe
 		summarizeBy: none
@@ -160,7 +160,7 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Liga'
+	column Liga
 		dataType: string
 		lineageTag: 0c35a592-a8c0-4f06-a338-79db443326ff
 		summarizeBy: none
@@ -170,6 +170,7 @@ table 'warehouse vw_live_events_current'
 
 	column Detalle = IF ( NOT ISBLANK ( 'warehouse vw_live_events_current'[Asistencia] ), "Asistencia: " & 'warehouse vw_live_events_current'[Asistencia], IF ( NOT ISBLANK ( 'warehouse vw_live_events_current'[Sustituye] ), "Entra: " & 'warehouse vw_live_events_current'[Sustituye], 'warehouse vw_live_events_current'[Resultado del tiro] ) )
 		dataType: string
+		lineageTag: b5a6e8bc-bc4f-45ed-9515-0023e0fc35c4
 		summarizeBy: none
 
 		annotation SummarizationSetBy = Automatic
@@ -182,3 +183,4 @@ table 'warehouse vw_live_events_current'
 				    vw_live_events_current = Origen{[Schema="warehouse",Item="vw_live_events_current"]}[Data]
 				in
 				    vw_live_events_current
+

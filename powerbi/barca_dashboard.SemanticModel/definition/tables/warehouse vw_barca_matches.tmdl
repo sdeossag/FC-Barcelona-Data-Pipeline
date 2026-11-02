@@ -1,7 +1,7 @@
 table 'warehouse vw_barca_matches'
 	lineageTag: 6a20ce4a-4bee-4d71-97df-185ed7831115
 
-	column 'match_id'
+	column match_id
 		dataType: int64
 		isHidden
 		lineageTag: 917d65bd-68c5-4172-8702-4846d575ae14
@@ -10,7 +10,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'comp_season_key'
+	column comp_season_key
 		dataType: string
 		isHidden
 		lineageTag: 5fa2a311-2f41-4e7e-adf0-fc1aeffbedf6
@@ -19,7 +19,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Competición'
+	column Competición
 		dataType: string
 		lineageTag: edb5d200-192f-4c95-916b-332dfffb75be
 		summarizeBy: none
@@ -27,7 +27,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Temporada'
+	column Temporada
 		dataType: int64
 		lineageTag: 6a0e8371-881d-4161-a92f-8bd95edd0789
 		summarizeBy: sum
@@ -35,7 +35,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fase'
+	column Fase
 		dataType: string
 		lineageTag: 1fcbc6bc-27ec-43df-9b71-913169131fda
 		summarizeBy: none
@@ -52,7 +52,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Jornada'
+	column Jornada
 		dataType: int64
 		formatString: #,0
 		lineageTag: db20612d-1e2f-41f6-bdde-b203ba952ce4
@@ -61,7 +61,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fecha'
+	column Fecha
 		dataType: dateTime
 		formatString: dd/MM/yyyy
 		lineageTag: d4241f5c-5751-4d80-8093-af196d295c5c
@@ -70,7 +70,9 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'opponent_id'
+		annotation UnderlyingDateTimeDataType = Date
+
+	column opponent_id
 		dataType: int64
 		isHidden
 		lineageTag: a9810cb4-7e56-4bf7-ad03-bea522203e2a
@@ -79,7 +81,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Rival'
+	column Rival
 		dataType: string
 		lineageTag: 7b0b3814-01f6-463e-8d05-f66350e6b773
 		summarizeBy: none
@@ -87,7 +89,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Local'
+	column Local
 		dataType: boolean
 		isHidden
 		lineageTag: f211346f-2c01-40bb-995e-469d834286fc
@@ -96,7 +98,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Sede'
+	column Sede
 		dataType: string
 		lineageTag: 2756c6f4-71b7-41a6-af91-f412d4f482ac
 		summarizeBy: none
@@ -122,7 +124,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Diferencia'
+	column Diferencia
 		dataType: int64
 		formatString: #,0
 		lineageTag: 3ed4ad32-56fd-44da-93ae-ea07a45707e1
@@ -131,7 +133,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Marcador'
+	column Marcador
 		dataType: string
 		lineageTag: 8fc6fe2a-1362-4d9f-b7b5-7f908f475a4b
 		summarizeBy: none
@@ -148,7 +150,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'result_code'
+	column result_code
 		dataType: string
 		isHidden
 		lineageTag: b2793556-f987-4392-9649-35d4a34d1638
@@ -157,7 +159,7 @@ table 'warehouse vw_barca_matches'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Puntos'
+	column Puntos
 		dataType: int64
 		formatString: #,0
 		lineageTag: bd1e9331-a6d0-4d3c-bcf1-b0d3afe9983f
@@ -181,3 +183,4 @@ table 'warehouse vw_barca_matches'
 				    vw_barca_matches = Origen{[Schema="warehouse",Item="vw_barca_matches"]}[Data]
 				in
 				    vw_barca_matches
+

@@ -1,7 +1,7 @@
 table 'warehouse vw_quality_results_latest'
 	lineageTag: 3295fa9e-dced-4809-8094-9f0126caa645
 
-	column 'run_id'
+	column run_id
 		dataType: string
 		isHidden
 		lineageTag: 336d3bc2-f2df-44b8-a798-3fb7689c2984
@@ -10,7 +10,7 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Control'
+	column Control
 		dataType: string
 		lineageTag: 6aebd485-bff0-46a2-817c-59dfb6f733fb
 		summarizeBy: none
@@ -18,7 +18,7 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Superado'
+	column Superado
 		dataType: boolean
 		isHidden
 		lineageTag: e174e5e4-1dce-4975-af7f-b1718d0b5adc
@@ -27,7 +27,7 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Valor'
+	column Valor
 		dataType: int64
 		lineageTag: 30f67320-f453-4dc8-be00-c38f9fad8be5
 		summarizeBy: none
@@ -35,7 +35,7 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Esperado'
+	column Esperado
 		dataType: string
 		lineageTag: fc6c586f-88ba-47f4-b9a7-2c920ede59f5
 		summarizeBy: none
@@ -43,7 +43,7 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Estado'
+	column Estado
 		dataType: string
 		lineageTag: 7f2c5b19-6c40-4a2e-9b53-0f8d1c6a2e71
 		summarizeBy: none
@@ -51,12 +51,28 @@ table 'warehouse vw_quality_results_latest'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Fecha'
+	column Fecha
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
 		lineageTag: 655dc22c-cb2d-4a34-82a9-eeb49f6d6e56
 		summarizeBy: none
 		sourceColumn: checked_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column check_name
+		dataType: string
+		lineageTag: 3cca720c-8d3d-4e20-a52d-cf3724e9c209
+		summarizeBy: none
+		sourceColumn: check_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column expectation
+		dataType: string
+		lineageTag: dd6d972d-fec9-400c-9535-4a0870ba55bf
+		summarizeBy: none
+		sourceColumn: expectation
 
 		annotation SummarizationSetBy = Automatic
 
@@ -68,3 +84,4 @@ table 'warehouse vw_quality_results_latest'
 				    vw_quality_results_latest = Origen{[Schema="warehouse",Item="vw_quality_results_latest"]}[Data]
 				in
 				    vw_quality_results_latest
+

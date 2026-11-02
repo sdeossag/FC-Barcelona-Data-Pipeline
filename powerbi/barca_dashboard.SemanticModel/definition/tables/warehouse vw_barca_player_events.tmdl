@@ -1,7 +1,7 @@
 table 'warehouse vw_barca_player_events'
 	lineageTag: 6d37ed4b-8360-4a05-84bd-e2edb3605775
 
-	column 'Jugador'
+	column Jugador
 		dataType: string
 		lineageTag: bcad9c66-ae9a-401d-9fdc-8942a240c9ea
 		summarizeBy: none
@@ -9,7 +9,7 @@ table 'warehouse vw_barca_player_events'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Goles'
+	column Goles
 		dataType: int64
 		formatString: #,0
 		lineageTag: c9357422-2944-4a64-a80b-41339321a8cd
@@ -18,7 +18,7 @@ table 'warehouse vw_barca_player_events'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Asistencias'
+	column Asistencias
 		dataType: int64
 		formatString: #,0
 		lineageTag: e1863881-2417-4dcc-9dd9-f8296f37aeb9
@@ -27,7 +27,7 @@ table 'warehouse vw_barca_player_events'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Tiros'
+	column Tiros
 		dataType: int64
 		formatString: #,0
 		lineageTag: e36a360a-b026-46a1-a502-f61f25b147a5
@@ -63,7 +63,7 @@ table 'warehouse vw_barca_player_events'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Amarillas'
+	column Amarillas
 		dataType: int64
 		formatString: #,0
 		lineageTag: 81428fac-e579-424f-92db-7ad5d2bca077
@@ -72,7 +72,7 @@ table 'warehouse vw_barca_player_events'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Rojas'
+	column Rojas
 		dataType: int64
 		formatString: #,0
 		lineageTag: 4c783e44-3596-454e-bf7f-3ab452d0961f
@@ -89,3 +89,4 @@ table 'warehouse vw_barca_player_events'
 				    vw_barca_player_events = Origen{[Schema="warehouse",Item="vw_barca_player_events"]}[Data]
 				in
 				    vw_barca_player_events
+
