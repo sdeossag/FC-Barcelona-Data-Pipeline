@@ -4,10 +4,10 @@
   "position": {
     "x": 24,
     "y": 188,
-    "z": 60,
+    "z": 130,
     "height": 170,
     "width": 610,
-    "tabOrder": 60
+    "tabOrder": 130
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -97,6 +97,17 @@
                   "Value": "9D"
                 }
               }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -108,6 +119,24 @@
               "expr": {
                 "Literal": {
                   "Value": "10D"
+                }
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
@@ -130,6 +159,35 @@
                   "Value": "false"
                 }
               }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridlineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#24365C'"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -150,6 +208,17 @@
                   "Value": "9D"
                 }
               }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#EEF2FA'"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -162,7 +231,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#004D98'"
+                      "Value": "'#3D8BFF'"
                     }
                   }
                 }
@@ -180,7 +249,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#A50044'"
+                      "Value": "'#F0527F'"
                     }
                   }
                 }
@@ -216,7 +285,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#16181D'"
+                      "Value": "'#EEF2FA'"
                     }
                   }
                 }
@@ -248,7 +317,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -272,7 +341,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -303,7 +372,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E6E2D9'"
+                      "Value": "'#24365C'"
                     }
                   }
                 }

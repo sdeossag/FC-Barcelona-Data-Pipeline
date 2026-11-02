@@ -4,10 +4,10 @@
   "position": {
     "x": 24,
     "y": 88,
-    "z": 20,
+    "z": 90,
     "height": 88,
     "width": 144,
-    "tabOrder": 20
+    "tabOrder": 90
   },
   "visual": {
     "visualType": "card",
@@ -106,7 +106,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Marcador en vivo'"
+                  "Value": "'Marcador'"
                 }
               }
             },
@@ -115,7 +115,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#C9D8EE'"
                     }
                   }
                 }

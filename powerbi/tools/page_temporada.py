@@ -2,8 +2,8 @@
 import json
 from pathlib import Path
 
-from layout import G, M, W, data_table, header, kpi_row, span
-from pbir import (BLUE, CANVAS, GRANATE, INK, RIVAL, Page, col, color, container,
+from layout import G, M, W, axes, data_table, header, kpi_row, span
+from pbir import (BLUE, CANVAS, GOLD, GRANATE, INK, RIVAL, Page, col, color, container,
                   in_filter, lit, meas, projection)
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
@@ -38,7 +38,7 @@ y = kpi_row(page, [
     ("Puntos", "Puntos", BLUE, "hero"),
     ("Partidos jugados", "Partidos jugados", INK),
     ("Goles a favor / en contra", "Goles texto", INK),
-    ("% de victorias", "% Victorias", INK),
+    ("% de victorias", "% Victorias", GOLD),
 ])
 
 # ---- Middle row: title race (8 cols) and standings (4 cols) ---------------
@@ -52,7 +52,7 @@ page.add("race", M, mid_y, race_w, mid_h, {
         "Y": {"projections": [projection(meas("Puntos acumulados"))]},
     }},
     "objects": {
-        "legend": [{"properties": {"show": lit(False)}}],
+        **axes(),
         # A selector-less entry is the default for every series, so rivals stay
         # neutral grey whichever teams the season produces. Barcelona is the
         # only series named, which keeps the colour meaningful.
@@ -96,14 +96,11 @@ page.add("goals", M, bot_y, race_w, 720 - 16 - bot_y, {
         "Y": {"projections": [projection(meas("Goles a favor")), projection(meas("Goles en contra"))]},
     }},
     "objects": {
-        "legend": [{"properties": {"position": lit("TopRight"), "showTitle": lit(False),
-                                   "fontSize": lit(9)}}],
+        **axes(legend=True),
         "dataPoint": [
             {"properties": {"fill": color(BLUE)}, "selector": {"metadata": "Medidas.Goles a favor"}},
             {"properties": {"fill": color(GRANATE)}, "selector": {"metadata": "Medidas.Goles en contra"}},
         ],
-        "categoryAxis": [{"properties": {"fontSize": lit(9)}}],
-        "valueAxis": [{"properties": {"fontSize": lit(9), "showAxisTitle": lit(False)}}],
     },
     "visualContainerObjects": container("Goles a favor y en contra por jornada",
                                         padding=(4, 12, 8, 8)),

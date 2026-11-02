@@ -1,46 +1,46 @@
 {
   "name": "Barca Data Pipeline",
   "dataColors": [
-    "#004D98",
-    "#A50044",
-    "#1F7A5C",
-    "#8C929B",
-    "#C9A227",
-    "#5B7FA6",
-    "#B56576",
-    "#B9B4A8"
+    "#3D8BFF",
+    "#F0527F",
+    "#EDBB00",
+    "#5C6B8A",
+    "#00A3A3",
+    "#9B7BFF",
+    "#FF8A5C",
+    "#8FA0C0"
   ],
-  "background": "#FFFFFF",
-  "secondaryBackground": "#EFEBE2",
-  "foreground": "#16181D",
-  "tableAccent": "#004D98",
-  "good": "#1F7A5C",
-  "neutral": "#8C929B",
-  "bad": "#A50044",
-  "maximum": "#004D98",
-  "center": "#E6E2D9",
-  "minimum": "#EEF2F7",
+  "background": "#131F38",
+  "secondaryBackground": "#0B1426",
+  "foreground": "#EEF2FA",
+  "tableAccent": "#3D8BFF",
+  "good": "#3D8BFF",
+  "neutral": "#5C6B8A",
+  "bad": "#F0527F",
+  "maximum": "#3D8BFF",
+  "center": "#24365C",
+  "minimum": "#182847",
   "null": "#D8D3C8",
   "textClasses": {
     "callout": {
       "fontFace": "Segoe UI Semibold",
       "fontSize": 30,
-      "color": "#16181D"
+      "color": "#EEF2FA"
     },
     "title": {
       "fontFace": "Segoe UI Semibold",
       "fontSize": 12,
-      "color": "#16181D"
+      "color": "#EEF2FA"
     },
     "header": {
       "fontFace": "Segoe UI Semibold",
       "fontSize": 10,
-      "color": "#16181D"
+      "color": "#EEF2FA"
     },
     "label": {
       "fontFace": "Segoe UI",
       "fontSize": 10,
-      "color": "#6D7178"
+      "color": "#8FA0C0"
     }
   },
   "visualStyles": {
@@ -51,7 +51,7 @@
             "show": true,
             "color": {
               "solid": {
-                "color": "#FFFFFF"
+                "color": "#131F38"
               }
             },
             "transparency": 0
@@ -62,7 +62,7 @@
             "show": true,
             "color": {
               "solid": {
-                "color": "#E6E2D9"
+                "color": "#24365C"
               }
             },
             "radius": 8
@@ -78,12 +78,12 @@
             "show": true,
             "fontColor": {
               "solid": {
-                "color": "#16181D"
+                "color": "#EEF2FA"
               }
             },
             "background": {
               "solid": {
-                "color": "#FFFFFF"
+                "color": "#131F38"
               }
             },
             "alignment": "left",
@@ -97,7 +97,7 @@
             "showAxisTitle": false,
             "labelColor": {
               "solid": {
-                "color": "#6D7178"
+                "color": "#8FA0C0"
               }
             },
             "fontSize": 9,
@@ -110,14 +110,14 @@
             "showAxisTitle": false,
             "labelColor": {
               "solid": {
-                "color": "#6D7178"
+                "color": "#8FA0C0"
               }
             },
             "fontSize": 9,
             "gridlineShow": true,
             "gridlineColor": {
               "solid": {
-                "color": "#E6E2D9"
+                "color": "#24365C"
               }
             },
             "gridlineThickness": 1
@@ -130,7 +130,7 @@
             "showTitle": false,
             "labelColor": {
               "solid": {
-                "color": "#6D7178"
+                "color": "#8FA0C0"
               }
             },
             "fontSize": 9
@@ -156,13 +156,13 @@
             "gridHorizontal": true,
             "gridHorizontalColor": {
               "solid": {
-                "color": "#E6E2D9"
+                "color": "#24365C"
               }
             },
             "rowPadding": 4,
             "outlineColor": {
               "solid": {
-                "color": "#E6E2D9"
+                "color": "#24365C"
               }
             },
             "outlineWeight": 1
@@ -172,7 +172,7 @@
           {
             "fontColor": {
               "solid": {
-                "color": "#16181D"
+                "color": "#EEF2FA"
               }
             },
             "backColor": {
@@ -189,12 +189,12 @@
           {
             "fontColor": {
               "solid": {
-                "color": "#16181D"
+                "color": "#EEF2FA"
               }
             },
             "backColor": {
               "solid": {
-                "color": "#FFFFFF"
+                "color": "#131F38"
               }
             },
             "fontSize": 9,
@@ -210,13 +210,13 @@
             "show": true,
             "fontColor": {
               "solid": {
-                "color": "#6D7178"
+                "color": "#8FA0C0"
               }
             },
             "fontSize": 9,
             "background": {
               "solid": {
-                "color": "#FFFFFF"
+                "color": "#131F38"
               }
             },
             "outline": "None"
@@ -226,12 +226,12 @@
           {
             "fontColor": {
               "solid": {
-                "color": "#16181D"
+                "color": "#EEF2FA"
               }
             },
             "background": {
               "solid": {
-                "color": "#FFFFFF"
+                "color": "#131F38"
               }
             },
             "fontSize": 9

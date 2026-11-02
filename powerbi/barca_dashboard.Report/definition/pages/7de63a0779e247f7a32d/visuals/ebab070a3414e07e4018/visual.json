@@ -4,10 +4,10 @@
   "position": {
     "x": 24,
     "y": 88,
-    "z": 20,
+    "z": 90,
     "height": 88,
     "width": 299,
-    "tabOrder": 20
+    "tabOrder": 90
   },
   "visual": {
     "visualType": "card",
@@ -115,7 +115,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#C9D8EE'"
                     }
                   }
                 }

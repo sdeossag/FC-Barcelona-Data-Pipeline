@@ -1,7 +1,7 @@
 """Builds the 'Partidos' page: results, recent form and home against away."""
 from pathlib import Path
 
-from layout import G, M, W, data_table, header, kpi_row, span
+from layout import G, M, W, axes, data_table, header, kpi_row, span
 from pbir import (BLUE, CANVAS, GRANATE, INK, Page, col, color, container, lit, meas,
                   projection)
 
@@ -44,11 +44,8 @@ page.add("win_rate", bars_x, mid_y, W - (bars_x - M), mid_h, {
         "Y": {"projections": [projection(meas("% Victorias"))]},
     }},
     "objects": {
-        "legend": [{"properties": {"show": lit(False)}}],
+        **axes(hide_value=True, value_end=1, labels=True),
         "dataPoint": [{"properties": {"fill": color(BLUE)}}],
-        "labels": [{"properties": {"show": lit(True), "fontSize": lit(9)}}],
-        "valueAxis": [{"properties": {"show": lit(False), "end": lit(1), "start": lit(0)}}],
-        "categoryAxis": [{"properties": {"fontSize": lit(9)}}],
     },
     "visualContainerObjects": container("% de victorias por sede", padding=(4, 12, 8, 8)),
 })

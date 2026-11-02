@@ -4,10 +4,10 @@
   "position": {
     "x": 646,
     "y": 188,
-    "z": 120,
+    "z": 190,
     "height": 250,
     "width": 610,
-    "tabOrder": 120
+    "tabOrder": 190
   },
   "visual": {
     "visualType": "hundredPercentStackedBarChart",
@@ -111,6 +111,17 @@
                   "Value": "9D"
                 }
               }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -122,6 +133,24 @@
               "expr": {
                 "Literal": {
                   "Value": "10D"
+                }
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
@@ -142,6 +171,35 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
+                }
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridlineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#24365C'"
+                    }
+                  }
                 }
               }
             },
@@ -171,6 +229,17 @@
                   "Value": "9D"
                 }
               }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#EEF2FA'"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -183,7 +252,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#004D98'"
+                      "Value": "'#3D8BFF'"
                     }
                   }
                 }
@@ -201,7 +270,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#B4B2A9'"
+                      "Value": "'#5C6B8A'"
                     }
                   }
                 }
@@ -219,7 +288,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#A50044'"
+                      "Value": "'#F0527F'"
                     }
                   }
                 }
@@ -255,7 +324,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#16181D'"
+                      "Value": "'#EEF2FA'"
                     }
                   }
                 }
@@ -287,7 +356,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -311,7 +380,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -342,7 +411,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E6E2D9'"
+                      "Value": "'#24365C'"
                     }
                   }
                 }

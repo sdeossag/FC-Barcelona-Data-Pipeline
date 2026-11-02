@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from layout import G, M, chart, data_table, header, kpi_row, span
-from pbir import (BLUE, CANVAS, GRANATE, INK, RIVAL, Page, col, container,
+from pbir import (BLUE, CANVAS, GOLD, GRANATE, INK, RIVAL, Page, col, container,
                   in_filter, meas)
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
@@ -24,10 +24,10 @@ right_x = M + half + G
 
 # ---- Left: streaming layer -------------------------------------------------
 y = kpi_row(page, [
-    ("Marcador en vivo", "Marcador en vivo", INK, "hero"),
+    ("Marcador", "Marcador en vivo", INK, "hero"),
     ("Minuto", "Minuto actual", INK),
-    ("Eventos procesados", "Eventos procesados", INK),
-    ("Latencia media (ms)", "Latencia media (ms)", INK),
+    ("Eventos", "Eventos procesados", INK),
+    ("Latencia (ms)", "Latencia media (ms)", INK),
 ], x0=M, total_w=half, prefix="live")
 
 top_h = 170
@@ -44,9 +44,9 @@ data_table(page, "live_events", M, ev_y, half, 720 - 16 - ev_y, "Eventos recibid
 
 # ---- Right: prediction layer ----------------------------------------------
 kpi_row(page, [
-    ("Exactitud del modelo", "Exactitud del modelo", INK, "hero"),
-    ("Exactitud base", "Exactitud base", INK),
-    ("Mejora vs base", "Mejora vs base", BLUE),
+    ("Exactitud", "Exactitud del modelo", INK, "hero"),
+    ("Base", "Exactitud base", INK),
+    ("Mejora", "Mejora vs base", GOLD),
     ("Log loss", "Log loss", INK),
 ], x0=right_x, total_w=half, prefix="model")
 
@@ -65,8 +65,8 @@ chart(page, "probabilities", right_x, y + G, half, 250 - 0, "Probabilidad de res
 fx_y = y + G + 250 + G
 data_table(page, "fixtures", right_x, fx_y, half, 720 - 16 - fx_y, "Próximos partidos y pronóstico", [
     col(FIXTURES, "Fecha"), col(FIXTURES, "Rival"), col(FIXTURES, "Sede"),
-    col(FIXTURES, "Predicción"), meas("Prob. Barça gana"), col(FIXTURES, "Confianza"),
-], col(FIXTURES, "Fecha"), "Ascending", widths=[0.15, 0.27, 0.1, 0.2, 0.14, 0.14], row_padding=1)
+    meas("Prob. Barça gana"), meas("Prob. empate"), meas("Prob. rival gana"),
+], col(FIXTURES, "Fecha"), "Ascending", widths=[0.15, 0.31, 0.1, 0.15, 0.14, 0.15], row_padding=1)
 
 page.write()
 page.set_canvas(CANVAS)

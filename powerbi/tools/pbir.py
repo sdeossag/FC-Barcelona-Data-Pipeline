@@ -12,15 +12,22 @@ from pathlib import Path
 SCHEMA = ("https://developer.microsoft.com/json-schemas/fabric/item/report/"
           "definition/visualContainer/2.8.0/schema.json")
 
-# Design tokens. Barca colours are accents; everything else is neutral.
-INK = "#16181D"
-MUTED = "#6D7178"
-CARD = "#FFFFFF"
-LINE = "#E6E2D9"
-CANVAS = "#F5F3EE"
-BLUE = "#004D98"
-GRANATE = "#A50044"
-RIVAL = "#B4B2A9"
+# Design tokens: a night-time Barcelona palette. Surfaces are navy; the club
+# colours are accents. Text and series use the brighter blue/garnet because the
+# official #004D98 and #A50044 lose contrast on a dark surface; the official
+# values are kept for fills (band, hero tile, stripe), where white text sits on them.
+CANVAS = "#0B1426"
+CARD = "#131F38"
+ALT = "#182847"      # alternate table row
+LINE = "#24365C"
+INK = "#EEF2FA"
+MUTED = "#8FA0C0"
+BAND = "#004D98"     # official blue, for fills
+GARNET = "#A50044"   # official garnet, for fills
+BLUE = "#3D8BFF"     # Barcelona series and highlights
+GRANATE = "#F0527F"  # "against", losses and alerts
+GOLD = "#EDBB00"     # the crest's gold: what is worth celebrating
+RIVAL = "#5C6B8A"
 
 
 def lit(value):

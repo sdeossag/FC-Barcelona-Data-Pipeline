@@ -4,10 +4,10 @@
   "position": {
     "x": 646,
     "y": 450,
-    "z": 130,
+    "z": 200,
     "height": 254,
     "width": 610,
-    "tabOrder": 130
+    "tabOrder": 200
   },
   "visual": {
     "visualType": "tableEx",
@@ -59,20 +59,6 @@
             },
             {
               "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "warehouse vw_barca_fixtures"
-                    }
-                  },
-                  "Property": "Predicción"
-                }
-              },
-              "queryRef": "warehouse vw_barca_fixtures.Predicción",
-              "nativeQueryRef": "Predicción"
-            },
-            {
-              "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
@@ -87,17 +73,31 @@
             },
             {
               "field": {
-                "Column": {
+                "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "warehouse vw_barca_fixtures"
+                      "Entity": "Medidas"
                     }
                   },
-                  "Property": "Confianza"
+                  "Property": "Prob. empate"
                 }
               },
-              "queryRef": "warehouse vw_barca_fixtures.Confianza",
-              "nativeQueryRef": "Confianza"
+              "queryRef": "Medidas.Prob. empate",
+              "nativeQueryRef": "Prob. empate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Prob. rival gana"
+                }
+              },
+              "queryRef": "Medidas.Prob. rival gana",
+              "nativeQueryRef": "Prob. rival gana"
             }
           ]
         }
@@ -136,7 +136,18 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#EEEBE3'"
+                      "Value": "'#24365C'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridHorizontalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#24365C'"
                     }
                   }
                 }
@@ -174,7 +185,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#6D7178'"
+                      "Value": "'#8FA0C0'"
                     }
                   }
                 }
@@ -199,7 +210,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -216,7 +227,40 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#16181D'"
+                      "Value": "'#EEF2FA'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#EEF2FA'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#131F38'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#182847'"
                     }
                   }
                 }
@@ -265,7 +309,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "153D"
+                  "Value": "175D"
                 }
               }
             }
@@ -293,21 +337,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "113D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "warehouse vw_barca_fixtures.Predicción"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "79D"
+                  "Value": "85D"
                 }
               }
             }
@@ -327,7 +357,21 @@
             }
           },
           "selector": {
-            "metadata": "warehouse vw_barca_fixtures.Confianza"
+            "metadata": "Medidas.Prob. empate"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "85D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "Medidas.Prob. rival gana"
           }
         }
       ]
@@ -355,7 +399,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#16181D'"
+                      "Value": "'#EEF2FA'"
                     }
                   }
                 }
@@ -387,7 +431,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -411,7 +455,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#FFFFFF'"
+                      "Value": "'#131F38'"
                     }
                   }
                 }
@@ -442,7 +486,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E6E2D9'"
+                      "Value": "'#24365C'"
                     }
                   }
                 }

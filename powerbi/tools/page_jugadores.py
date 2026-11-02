@@ -1,8 +1,8 @@
 """Builds the 'Jugadores' page: top scorers, expected goals and finishing."""
 from pathlib import Path
 
-from layout import G, M, W, chart, data_table, header, kpi_row, measure_color, span
-from pbir import (BLUE, CANVAS, INK, Page, col, color, container, lit, meas,
+from layout import G, M, W, axes, chart, data_table, header, kpi_row, span
+from pbir import (BLUE, CANVAS, INK, RIVAL, Page, col, color, container, lit, meas,
                   projection)
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
@@ -23,11 +23,13 @@ y = kpi_row(page, [
 # ---- Middle row: scorers as bars (Barcelona in blue) and as a table --------
 mid_y, mid_h = y + G, 250
 bars_w = span(5)
-chart(page, "scorers_bars", M, mid_y, bars_w, mid_h, "Máximos goleadores", "clusteredBarChart",
-      col(SCORERS, "Jugador"), [meas("Goles jugador")], labels=True, hide_value_axis=True,
-      sort=(meas("Goles jugador"), "Descending"),
-      # Field-value colour: Barcelona's players blue, everyone else grey.
-      extra={"dataPoint": [{"properties": {"fill": measure_color("Color jugador")}}]})
+# Two series instead of one coloured by a measure: Barcelona's players are blue
+# and everyone else grey, which Power BI applies reliably. The total goals sit in
+# the tooltip so the bars can still be sorted by it.
+chart(page, "scorers_bars", M, mid_y, bars_w, mid_h, "Máximos goleadores", "stackedBarChart",
+      col(SCORERS, "Jugador"), [meas("Goles (Barça)"), meas("Goles (resto)")],
+      colors={"Goles (Barça)": BLUE, "Goles (resto)": RIVAL}, labels=True, hide_value_axis=True,
+      tooltips=[meas("Goles jugador")], sort=(meas("Goles jugador"), "Descending"))
 
 data_table(page, "scorers_table", M + bars_w + G, mid_y, W - bars_w - G, mid_h,
            "Tabla de goleadores", [
@@ -49,13 +51,10 @@ page.add("xg_scatter", M, low_y, half, low_h, {
         "Y": {"projections": [projection(meas("Goles reales"))]},
     }},
     "objects": {
-        "legend": [{"properties": {"show": lit(False)}}],
+        **axes(),
         "dataPoint": [{"properties": {"fill": color(BLUE)}}],
-        "categoryLabels": [{"properties": {"show": lit(True), "fontSize": lit(9)}}],
-        "categoryAxis": [{"properties": {"fontSize": lit(9), "showAxisTitle": lit(True),
-                                         "axisTitle": lit("xG (goles esperados)")}}],
-        "valueAxis": [{"properties": {"fontSize": lit(9), "showAxisTitle": lit(True),
-                                      "axisTitle": lit("Goles")}}],
+        "categoryLabels": [{"properties": {"show": lit(True), "fontSize": lit(9),
+                                           "color": color(INK)}}],
     },
     "visualContainerObjects": container("xG contra goles · StatsBomb, Barça 4-0 Granada (2020/21)",
                                         padding=(4, 12, 8, 8)),

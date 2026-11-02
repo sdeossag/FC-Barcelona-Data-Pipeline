@@ -231,31 +231,31 @@ table Medidas
 	measure 'Goles texto' = FORMAT ( [Goles a favor], "#,0" ) & " / " & FORMAT ( [Goles en contra], "#,0" )
 		displayFolder: Temporada
 
-	measure 'Color equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#FFFFFF", "#16181D" )
+	measure 'Color equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#FFFFFF", "#EEF2FA" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#004D98", "#FFFFFF" )
+	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#004D98", "#131F38" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Color resultado' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_matches'[result_code] ), "V", "#004D98", "D", "#A50044", "#16181D" )
+	measure 'Color resultado' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_matches'[result_code] ), "V", "#3D8BFF", "D", "#F0527F", "#EEF2FA" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Color forma' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_form_last5'[result_code] ), "V", "#004D98", "D", "#A50044", "#16181D" )
+	measure 'Color forma' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_form_last5'[result_code] ), "V", "#3D8BFF", "D", "#F0527F", "#EEF2FA" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Color jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#004D98", "#B4B2A9" )
+	measure 'Color jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#3D8BFF", "#5C6B8A" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Texto jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#FFFFFF", "#16181D" )
+	measure 'Texto jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#FFFFFF", "#EEF2FA" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Fondo jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#004D98", "#FFFFFF" )
+	measure 'Fondo jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#004D98", "#131F38" )
 		isHidden
 		displayFolder: Formato
 
@@ -322,14 +322,22 @@ table Medidas
 	measure 'Tablas frescas texto' = COALESCE ( [Tablas frescas], 0 ) & " / " & [Tablas monitorizadas]
 		displayFolder: Calidad
 
-	measure 'Color estado' = IF ( SELECTEDVALUE ( 'warehouse vw_pipeline_health'[Fresca] ), "#004D98", "#A50044" )
+	measure 'Color estado' = IF ( SELECTEDVALUE ( 'warehouse vw_pipeline_health'[Fresca] ), "#3D8BFF", "#F0527F" )
 		isHidden
 		displayFolder: Formato
 
-	measure 'Color control' = IF ( SELECTEDVALUE ( 'warehouse vw_quality_results_latest'[Superado] ), "#004D98", "#A50044" )
+	measure 'Color control' = IF ( SELECTEDVALUE ( 'warehouse vw_quality_results_latest'[Superado] ), "#3D8BFF", "#F0527F" )
 		isHidden
 		displayFolder: Formato
 
 	measure 'Goles jugador' = SUM ( 'warehouse vw_top_scorers'[Goles] )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Goles (Barça)' = CALCULATE ( SUM ( 'warehouse vw_top_scorers'[Goles] ), 'warehouse vw_top_scorers'[Barça] = TRUE () )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Goles (resto)' = CALCULATE ( SUM ( 'warehouse vw_top_scorers'[Goles] ), 'warehouse vw_top_scorers'[Barça] = FALSE () )
 		formatString: #,0
 		displayFolder: Jugadores
