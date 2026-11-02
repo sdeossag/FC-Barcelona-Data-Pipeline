@@ -133,6 +133,30 @@ CHECKS: tuple[WarehouseCheck, ...] = (
         passes=lambda value: value == 0,
         expectation="a scorer cannot have more penalty goals than total goals",
     ),
+    # Two independent sources describe the same match: football-data.org gives
+    # the final score and ESPN gives the event log. If the goals in the events do
+    # not add up to the final score, the stream dropped or mislabelled a goal.
+    # This is the check that exposed ESPN's "Goal - Header" and "Goal -
+    # Free-kick" labels, which a first mapping missed. Matches the stream has not
+    # covered are not compared, so an empty live_events table passes.
+    WarehouseCheck(
+        name="live_events_goals_match_final_scores",
+        sql=(
+            "SELECT COUNT(*) FROM ("
+            " SELECT match_id, MIN(event_ts)::date AS played_on,"
+            "        MAX(detail->>'league') AS league,"
+            "        COUNT(*) FILTER (WHERE event_type IN ('GOAL', 'OWN_GOAL')) AS goals"
+            " FROM live_events GROUP BY match_id) e"
+            " JOIN matches m"
+            "   ON m.status = 'FINISHED'"
+            "  AND (m.home_team_id = 81 OR m.away_team_id = 81)"
+            "  AND m.date::date BETWEEN e.played_on - 1 AND e.played_on + 1"
+            "  AND m.competition = CASE e.league WHEN 'esp.1' THEN 'PD' ELSE 'CL' END"
+            " WHERE e.goals <> m.home_goals + m.away_goals"
+        ),
+        passes=lambda value: value == 0,
+        expectation="goals in the event stream must equal the final score of the same match",
+    ),
 )
 
 
