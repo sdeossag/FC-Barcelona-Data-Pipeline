@@ -1,0 +1,195 @@
+table 'warehouse vw_barca_form_last5'
+	lineageTag: 77ec0ba3-fdf1-4bd9-a7a1-ae66e3fc25c0
+
+	column match_id
+		dataType: int64
+		isHidden
+		lineageTag: cd786de7-1d83-41fa-9ac5-e9cdbab13450
+		summarizeBy: none
+		sourceColumn: match_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column comp_season_key
+		dataType: string
+		isHidden
+		lineageTag: c2325743-f65b-41ae-93ca-58b6f0e4fd29
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Competición
+		dataType: string
+		lineageTag: 05c0338a-976a-4068-9f56-68b3a7595a4b
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column Temporada
+		dataType: int64
+		lineageTag: f9886acb-f494-46ab-acd6-60de6aa6299b
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fase
+		dataType: string
+		lineageTag: f8c9b895-3b14-416b-9826-18ea3d203035
+		summarizeBy: none
+		sourceColumn: stage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fase de liga'
+		dataType: boolean
+		isHidden
+		lineageTag: 947532ba-4426-41b8-a582-c56d7410c7c8
+		summarizeBy: none
+		sourceColumn: is_group_stage
+
+		annotation SummarizationSetBy = Automatic
+
+	column Jornada
+		dataType: int64
+		formatString: #,0
+		lineageTag: 5f4b7dfc-97b2-4e52-ba1d-a00948cc0232
+		summarizeBy: sum
+		sourceColumn: matchday
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fecha
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 1220d052-6e6f-4aad-b84f-61d15364af75
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column opponent_id
+		dataType: int64
+		isHidden
+		lineageTag: dc733ada-c60c-4016-91e7-101359dc0a1e
+		summarizeBy: none
+		sourceColumn: opponent_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column Rival
+		dataType: string
+		lineageTag: f09bdd35-9ead-4e46-bf3f-d0ddc1734619
+		summarizeBy: none
+		sourceColumn: opponent_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Local
+		dataType: boolean
+		isHidden
+		lineageTag: 2ed068ac-16cf-4d4d-b5b1-91ff8b7b3464
+		summarizeBy: none
+		sourceColumn: is_home
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sede
+		dataType: string
+		lineageTag: c962bdf3-6b0b-42cb-b3c1-008d39ecc6a8
+		summarizeBy: none
+		sourceColumn: venue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Goles a favor'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 580b38e0-e1db-40d4-99c3-755b707fe325
+		summarizeBy: sum
+		sourceColumn: goals_for
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Goles en contra'
+		dataType: int64
+		formatString: #,0
+		lineageTag: adaa05b3-564a-4a48-8486-b907a56bb850
+		summarizeBy: sum
+		sourceColumn: goals_against
+
+		annotation SummarizationSetBy = Automatic
+
+	column Diferencia
+		dataType: int64
+		formatString: #,0
+		lineageTag: e8ca07bb-48b1-45f9-b90c-fe16155290d5
+		summarizeBy: sum
+		sourceColumn: goal_difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column Marcador
+		dataType: string
+		lineageTag: 7b306a94-c40a-4587-99bc-3c0fec860e01
+		summarizeBy: none
+		sourceColumn: scoreline
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resultado (código)'
+		dataType: string
+		isHidden
+		lineageTag: 1fbf3616-2f7e-49ae-a376-c8be66c4c39d
+		summarizeBy: none
+		sourceColumn: result
+
+		annotation SummarizationSetBy = Automatic
+
+	column result_code
+		dataType: string
+		isHidden
+		lineageTag: a77f9eae-d294-4003-ac17-019c2a7a1bc5
+		summarizeBy: none
+		sourceColumn: result_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column Puntos
+		dataType: int64
+		formatString: #,0
+		lineageTag: 2d611e01-8e57-4644-acd8-f34720db5b16
+		summarizeBy: sum
+		sourceColumn: points
+
+		annotation SummarizationSetBy = Automatic
+
+	column Recencia
+		dataType: int64
+		isHidden
+		lineageTag: 4f47fc46-6a16-486e-9404-8a7748cf080f
+		summarizeBy: none
+		sourceColumn: recency
+
+		annotation SummarizationSetBy = Automatic
+
+	column Resultado = SWITCH ( 'warehouse vw_barca_form_last5'[result_code], "V", "Victoria", "E", "Empate", "D", "Derrota", "Sin resultado" )
+		dataType: string
+		lineageTag: 3a1c7d22-8f4b-4e51-9c6a-2d7f5b1e9a04
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_barca_form_last5' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_barca_form_last5 = Origen{[Schema="warehouse",Item="vw_barca_form_last5"]}[Data]
+				in
+				    vw_barca_form_last5
+

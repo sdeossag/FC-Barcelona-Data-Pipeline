@@ -1,0 +1,268 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 2091.199951171875,
+        "y": 180
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 7853.3787523479732,
+            "y": 695.36079960914685
+          },
+          "nodeIndex": "warehouse vw_top_scorers",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 6548.1659052754749,
+            "y": 401.77444741851104
+          },
+          "nodeIndex": "warehouse vw_dim_competition",
+          "nodeLineageTag": "7d75e47a-3370-433a-a262-941077a2aee3",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 867.529494139587,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "Medidas",
+          "nodeLineageTag": "109881f9-c06b-40e8-90b1-ae7053a4f37e",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 633.52949413958709,
+            "y": 303.78515333643145
+          },
+          "nodeIndex": "warehouse vw_barca_fixtures",
+          "nodeLineageTag": "933dd02b-2664-43a8-93ee-437706ed274c",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 280.28554094775211,
+            "y": 657.451724781075
+          },
+          "nodeIndex": "warehouse vw_barca_form_last5",
+          "nodeLineageTag": "77ec0ba3-fdf1-4bd9-a7a1-ae66e3fc25c0",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1151.5294941395869,
+            "y": 415.72586239053749
+          },
+          "nodeIndex": "warehouse vw_barca_goals_by_interval",
+          "nodeLineageTag": "16f1b235-cfbc-4151-9525-de35a79c1080",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1435.5294941395869,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "warehouse vw_barca_home_away",
+          "nodeLineageTag": "a3bee784-d9e8-4c37-a573-a716dcd86a91",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 303.66932596752162
+          },
+          "nodeIndex": "warehouse vw_barca_matches",
+          "nodeLineageTag": "6a20ce4a-4bee-4d71-97df-185ed7831115",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1719.5294941395869,
+            "y": 355.72586239053749
+          },
+          "nodeIndex": "warehouse vw_barca_player_events",
+          "nodeLineageTag": "6d37ed4b-8360-4a05-84bd-e2edb3605775",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 346.74754960219889,
+            "y": 303.73024127352306
+          },
+          "nodeIndex": "warehouse vw_dim_date",
+          "nodeLineageTag": "581ca1ce-e8ae-4345-8867-66c5d65d2fbf",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2003.5294941395869,
+            "y": 367.72586239053749
+          },
+          "nodeIndex": "warehouse vw_live_current_score",
+          "nodeLineageTag": "c3e968d9-94d4-424a-aedd-1321838aabd2",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2287.5294941395869,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "warehouse vw_live_events_current",
+          "nodeLineageTag": "907e16a7-3514-492b-8970-0e04952cebad",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2571.5294941395869,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "warehouse vw_model_metrics",
+          "nodeLineageTag": "6bc7320e-c84e-474d-a26d-548e5615c42e",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2855.5294941395869,
+            "y": 367.72586239053749
+          },
+          "nodeIndex": "warehouse vw_pipeline_health",
+          "nodeLineageTag": "c4853598-f5a3-4210-8098-30ad6bc8fc80",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3139.5294941395869,
+            "y": 379.72586239053749
+          },
+          "nodeIndex": "warehouse vw_quality_results_latest",
+          "nodeLineageTag": "3295fa9e-dced-4809-8094-9f0126caa645",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3423.5294941395869,
+            "y": 391.72586239053749
+          },
+          "nodeIndex": "warehouse vw_quality_summary",
+          "nodeLineageTag": "32724f9a-423a-41e0-b392-99b63f0d4329",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3707.5294941395869,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "warehouse vw_team_season_summary",
+          "nodeLineageTag": "86c6181b-aab7-41fe-8a03-0d1e5cd3af66",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 405.10974654705603,
+            "y": -50
+          },
+          "nodeIndex": "warehouse vw_title_probability_history",
+          "nodeLineageTag": "449dc01a-2a8f-4943-b956-5feb78e03359",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3991.5294941395869,
+            "y": 353.72586239053749
+          },
+          "nodeIndex": "warehouse vw_title_race",
+          "nodeLineageTag": "323184fd-45f5-4fb3-a8ab-5818aafc4588",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Todas las tablas",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Todas las tablas",
+  "defaultDiagram": "Todas las tablas"
+}

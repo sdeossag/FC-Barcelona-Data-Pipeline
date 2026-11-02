@@ -1,0 +1,92 @@
+table 'warehouse vw_barca_player_events'
+	lineageTag: 6d37ed4b-8360-4a05-84bd-e2edb3605775
+
+	column Jugador
+		dataType: string
+		lineageTag: bcad9c66-ae9a-401d-9fdc-8942a240c9ea
+		summarizeBy: none
+		sourceColumn: player_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Goles
+		dataType: int64
+		formatString: #,0
+		lineageTag: c9357422-2944-4a64-a80b-41339321a8cd
+		summarizeBy: sum
+		sourceColumn: goals
+
+		annotation SummarizationSetBy = Automatic
+
+	column Asistencias
+		dataType: int64
+		formatString: #,0
+		lineageTag: e1863881-2417-4dcc-9dd9-f8296f37aeb9
+		summarizeBy: sum
+		sourceColumn: assists
+
+		annotation SummarizationSetBy = Automatic
+
+	column Tiros
+		dataType: int64
+		formatString: #,0
+		lineageTag: e36a360a-b026-46a1-a502-f61f25b147a5
+		summarizeBy: sum
+		sourceColumn: shots
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'A puerta'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 48a60a96-0a05-4e3a-b3fe-bf9e2f7bbcba
+		summarizeBy: sum
+		sourceColumn: shots_on_target
+
+		annotation SummarizationSetBy = Automatic
+
+	column '% a puerta'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: bc64bc8f-d1b4-42cb-be0f-7c81ad064c08
+		summarizeBy: none
+		sourceColumn: on_target_rate
+
+		annotation SummarizationSetBy = Automatic
+
+	column '% conversión'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 28aad1e5-2df6-4383-8dc7-c45db6388f56
+		summarizeBy: none
+		sourceColumn: conversion_rate
+
+		annotation SummarizationSetBy = Automatic
+
+	column Amarillas
+		dataType: int64
+		formatString: #,0
+		lineageTag: 81428fac-e579-424f-92db-7ad5d2bca077
+		summarizeBy: sum
+		sourceColumn: yellow_cards
+
+		annotation SummarizationSetBy = Automatic
+
+	column Rojas
+		dataType: int64
+		formatString: #,0
+		lineageTag: 4c783e44-3596-454e-bf7f-3ab452d0961f
+		summarizeBy: sum
+		sourceColumn: red_cards
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_barca_player_events' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_barca_player_events = Origen{[Schema="warehouse",Item="vw_barca_player_events"]}[Data]
+				in
+				    vw_barca_player_events
+

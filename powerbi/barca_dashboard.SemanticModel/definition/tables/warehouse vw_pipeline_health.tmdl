@@ -1,0 +1,81 @@
+table 'warehouse vw_pipeline_health'
+	lineageTag: c4853598-f5a3-4210-8098-30ad6bc8fc80
+
+	column Tabla
+		dataType: string
+		lineageTag: bc58a523-e6d8-43c1-9674-dec6461f2eef
+		summarizeBy: none
+		sourceColumn: table_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Origen
+		dataType: string
+		lineageTag: ac707203-329b-4b61-adbd-c345379a9dde
+		summarizeBy: none
+		sourceColumn: source
+
+		annotation SummarizationSetBy = Automatic
+
+	column Filas
+		dataType: int64
+		formatString: #,0
+		lineageTag: e3034f27-96b7-4f66-8996-11c1172d426b
+		summarizeBy: sum
+		sourceColumn: row_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Última escritura'
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: e53941f7-b85b-4b88-9407-bde4a64d8162
+		summarizeBy: none
+		sourceColumn: last_write
+
+		annotation SummarizationSetBy = Automatic
+
+	column Horas
+		dataType: double
+		formatString: 0.00
+		lineageTag: 25f5a970-e9a4-49c5-8731-b2e95ff34474
+		summarizeBy: none
+		sourceColumn: age_hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fresca
+		dataType: boolean
+		isHidden
+		lineageTag: b7dae9a7-9bf1-4f62-a5ae-3c01b47ceac8
+		summarizeBy: none
+		sourceColumn: is_fresh
+
+		annotation SummarizationSetBy = Automatic
+
+	column Estado
+		dataType: string
+		lineageTag: 2d9b6f04-7a51-4c88-b0e3-5c1a8f7d64b2
+		summarizeBy: none
+		sourceColumn: freshness_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Umbral (h)'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 30d50f4f-be93-40d7-b8c3-7c04d8d81801
+		summarizeBy: sum
+		sourceColumn: threshold_hours
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_pipeline_health' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_pipeline_health = Origen{[Schema="warehouse",Item="vw_pipeline_health"]}[Data]
+				in
+				    vw_pipeline_health
+

@@ -1,8 +1,8 @@
 # ============================================================
 # Dependencies for the Kafka streaming services
 # ============================================================
-# Deliberately smaller than requirements.txt: the producer reads JSON from the
-# StatsBomb open data set and the consumer writes rows to PostgreSQL, so neither
+# Deliberately smaller than requirements.txt: the producer reads JSON from ESPN with the
+# standard library and the consumer writes rows to PostgreSQL, so neither
 # needs pandas or pyarrow. Connection handling lives in scripts/db.py precisely
 # so this image can stay lean.
 

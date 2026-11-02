@@ -1,7 +1,8 @@
 """Consume live match events from Kafka and persist them in the warehouse.
 
-The consumer is idempotent by design. Every message carries the event id
-StatsBomb assigned, and the insert conflicts on that id, so replaying a match --
+The consumer is idempotent by design. Every message carries a deterministic
+event id derived from the provider's play id (see espn.py), and the insert
+conflicts on that id, so replaying a match --
 or restarting the consumer from offset zero -- rewrites nothing and duplicates
 nothing. Reprocessing a topic is a normal recovery step, and the pipeline has to
 survive it without corrupting the table.

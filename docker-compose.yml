@@ -36,6 +36,12 @@ x-airflow-common: &airflow-common
     - ./logs:/opt/airflow/logs
     - ./scripts:/opt/airflow/scripts
     - ./data:/opt/airflow/data
+
+    # Trained models. The prediction DAG loads one at runtime, and without this
+    # mount it fails on a missing file rather than at parse time, which is a far
+    # more expensive way to find out.
+    - ./models:/opt/airflow/models
+
     - ./.env:/opt/airflow/.env:ro
 
 
@@ -302,7 +308,9 @@ services:
   # Started on demand rather than with the stack, because a replay is a finite
   # job and not a service:
   #   docker compose run --rm producer --list-matches
-  #   docker compose run --rm producer --match-id 3773565 --speed 60
+  #   docker compose run --rm producer                    # latest finished match
+  #   docker compose run --rm producer --backfill         # the whole season
+  #   docker compose run --rm producer --live --wait     # follow a match in progress
 
   producer:
     build:
@@ -327,7 +335,7 @@ services:
     volumes:
       - ./streaming:/app/streaming:ro
       - ./scripts:/app/scripts:ro
-      # Writable: StatsBomb event files are cached here on first download.
+      # Writable for the producer; ESPN events are fetched live and not cached.
       - ./data:/app/data
 
     # Never start with "docker compose up": this profile keeps it out of the

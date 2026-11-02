@@ -1,0 +1,118 @@
+table 'warehouse vw_title_probability_history'
+	lineageTag: 449dc01a-2a8f-4943-b956-5feb78e03359
+
+	column Competición
+		dataType: string
+		lineageTag: fdfab4c8-3a1f-44c8-8744-73ba76bfbd62
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column Temporada
+		dataType: int64
+		lineageTag: 8762c6d8-796a-4d52-bf7d-c7b1e11f8276
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column team_id
+		dataType: int64
+		isHidden
+		lineageTag: c7ac7253-5401-4b89-b8d0-f7dd9e77ed53
+		summarizeBy: none
+		sourceColumn: team_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
+		dataType: string
+		lineageTag: 5b975f1c-f18a-4cc9-962e-bc9cc09aed9f
+		summarizeBy: none
+		sourceColumn: team_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fecha
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 6d9b6b51-70a5-49cc-84dc-76896fed47c6
+		summarizeBy: none
+		sourceColumn: calculated_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Probabilidad
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 2e13eb50-31c1-4b59-804b-f23260426a5b
+		summarizeBy: none
+		sourceColumn: title_probability
+
+		annotation SummarizationSetBy = Automatic
+
+	column Simulaciones
+		dataType: int64
+		lineageTag: 53791f83-9759-4847-8590-0f447daff592
+		summarizeBy: sum
+		sourceColumn: simulations_used
+
+		annotation SummarizationSetBy = Automatic
+
+	column Modelo
+		dataType: string
+		lineageTag: 18e13d9a-1ae0-4920-9d30-cb4816fd0e58
+		summarizeBy: none
+		sourceColumn: model_version
+
+		annotation SummarizationSetBy = Automatic
+
+	column Partidos
+		dataType: int64
+		formatString: #,0
+		lineageTag: 094ca17b-66db-4501-b69d-4d21f52cf075
+		summarizeBy: sum
+		sourceColumn: matches_played
+
+		annotation SummarizationSetBy = Automatic
+
+	column Barça
+		dataType: boolean
+		isHidden
+		lineageTag: ce2a675b-a76c-45c2-9d1b-c200bb225049
+		summarizeBy: none
+		sourceColumn: is_barca
+
+		annotation SummarizationSetBy = Automatic
+
+	column Posición
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: c2a2a38e-49bf-48d3-be05-a03331ff0164
+		summarizeBy: none
+		sourceColumn: probability_rank
+
+		annotation SummarizationSetBy = Automatic
+
+	column comp_season_key
+		dataType: string
+		isHidden
+		lineageTag: 4c150043-12e4-4829-a33b-515bedf4858a
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_title_probability_history' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_title_probability_history = Origen{[Schema="warehouse",Item="vw_title_probability_history"]}[Data]
+				in
+				    vw_title_probability_history
+

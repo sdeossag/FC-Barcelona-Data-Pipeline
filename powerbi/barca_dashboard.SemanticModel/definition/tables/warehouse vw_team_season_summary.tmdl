@@ -1,0 +1,169 @@
+table 'warehouse vw_team_season_summary'
+	lineageTag: 86c6181b-aab7-41fe-8a03-0d1e5cd3af66
+
+	column comp_season_key
+		dataType: string
+		isHidden
+		lineageTag: 764f48a1-c663-43e8-94e7-0c113082cc44
+		summarizeBy: none
+		sourceColumn: comp_season_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Competición
+		dataType: string
+		lineageTag: 78ba8aa6-70dd-48d8-8cc3-72d19f234927
+		summarizeBy: none
+		sourceColumn: competition
+
+		annotation SummarizationSetBy = Automatic
+
+	column Temporada
+		dataType: int64
+		lineageTag: 77e71fae-9b2b-4706-a98b-a999704b1553
+		summarizeBy: sum
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column team_id
+		dataType: int64
+		isHidden
+		lineageTag: c875b8a6-7da1-4d16-bf8c-a6256c5e263e
+		summarizeBy: none
+		sourceColumn: team_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column Equipo
+		dataType: string
+		lineageTag: f249aa3e-43bb-4fd9-ba85-4a7b50b324ef
+		summarizeBy: none
+		sourceColumn: team_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Barça
+		dataType: boolean
+		isHidden
+		lineageTag: 95d93aa7-8df0-4cc6-be0f-4a138c640c06
+		summarizeBy: none
+		sourceColumn: is_barca
+
+		annotation SummarizationSetBy = Automatic
+
+	column PJ
+		dataType: int64
+		formatString: #,0
+		lineageTag: 0bacefbe-d682-4bd0-83ac-fe4e605d04c7
+		summarizeBy: sum
+		sourceColumn: matches_played
+
+		annotation SummarizationSetBy = Automatic
+
+	column GF
+		dataType: int64
+		formatString: #,0
+		lineageTag: 04345972-9ac3-4c66-aa9b-36127226ed0a
+		summarizeBy: sum
+		sourceColumn: goals_for
+
+		annotation SummarizationSetBy = Automatic
+
+	column GC
+		dataType: int64
+		formatString: #,0
+		lineageTag: ec63bf16-03d2-4c3e-bda0-bbca362ae1c9
+		summarizeBy: sum
+		sourceColumn: goals_against
+
+		annotation SummarizationSetBy = Automatic
+
+	column DG
+		dataType: int64
+		formatString: #,0
+		lineageTag: d02891d9-519e-482e-8b19-e2b9808fef89
+		summarizeBy: sum
+		sourceColumn: goal_difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column GF/partido
+		dataType: double
+		formatString: 0.00
+		lineageTag: 7dc74286-252c-473c-8a61-062838ab9ccd
+		summarizeBy: none
+		sourceColumn: goals_for_per_match
+
+		annotation SummarizationSetBy = Automatic
+
+	column GC/partido
+		dataType: double
+		formatString: 0.00
+		lineageTag: 7578731f-b645-4265-92f9-53a0aeb8c8c2
+		summarizeBy: none
+		sourceColumn: goals_against_per_match
+
+		annotation SummarizationSetBy = Automatic
+
+	column V
+		dataType: int64
+		formatString: #,0
+		lineageTag: 46c370d8-a64e-4bbc-b3ed-92bf43f18950
+		summarizeBy: sum
+		sourceColumn: wins
+
+		annotation SummarizationSetBy = Automatic
+
+	column E
+		dataType: int64
+		formatString: #,0
+		lineageTag: d683fb26-dde8-4c6a-9890-6a2ec5ac5fd0
+		summarizeBy: sum
+		sourceColumn: draws
+
+		annotation SummarizationSetBy = Automatic
+
+	column D
+		dataType: int64
+		formatString: #,0
+		lineageTag: 55294669-0d7f-446a-9d51-aebad49a4b78
+		summarizeBy: sum
+		sourceColumn: losses
+
+		annotation SummarizationSetBy = Automatic
+
+	column Pts
+		dataType: int64
+		formatString: #,0
+		lineageTag: 87877cb0-2ebb-4194-be0d-c7c25469bb0d
+		summarizeBy: sum
+		sourceColumn: points
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Porterías a cero'
+		dataType: int64
+		lineageTag: c60fe14f-ef95-4788-accb-59a67082fe15
+		summarizeBy: sum
+		sourceColumn: clean_sheets
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sin marcar'
+		dataType: int64
+		lineageTag: d35f9b00-6a67-477a-be01-ac276b243e9c
+		summarizeBy: sum
+		sourceColumn: scoreless_matches
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'warehouse vw_team_season_summary' = m
+		mode: import
+		source =
+				let
+				    Origen = PostgreSQL.Database("localhost:15432", "barca_warehouse"),
+				    vw_team_season_summary = Origen{[Schema="warehouse",Item="vw_team_season_summary"]}[Data]
+				in
+				    vw_team_season_summary
+

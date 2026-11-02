@@ -19,8 +19,8 @@ ARG PYTHON_VERSION=3.11
 ARG CONSTRAINTS_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
 
 # Copy the requirements before installing so Docker caches this layer and only
-# re-runs pip when requirements.txt itself changes.
-COPY requirements.txt /tmp/requirements.txt
+# re-runs pip when the requirements themselves change.
+COPY requirements.txt requirements-ml.txt /tmp/
 
 # Install as the unprivileged airflow user so the packages land in the same
 # site-packages the scheduler and webserver import from at runtime.
@@ -29,3 +29,16 @@ USER airflow
 RUN pip install --no-cache-dir \
       --constraint "${CONSTRAINTS_URL}" \
       --requirement /tmp/requirements.txt
+
+# The prediction DAG imports scikit-learn and xgboost, so they belong in this
+# image too -- and under the same constraints as everything else.
+#
+# Installing them unconstrained breaks the image. None of them is named in the
+# constraints file, but numpy is, at 1.24.4, and a free resolution pulls in
+# numpy 2.x to satisfy a recent scikit-learn. pandas 2.1.4 in this image is
+# compiled against the 1.x ABI, so every import then fails with "numpy.dtype
+# size changed". Passing the constraints pins numpy and lets the packages that
+# are absent from it resolve freely, which is exactly what is wanted.
+RUN pip install --no-cache-dir \
+      --constraint "${CONSTRAINTS_URL}" \
+      --requirement /tmp/requirements-ml.txt
