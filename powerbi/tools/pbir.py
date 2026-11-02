@@ -116,6 +116,14 @@ class Page:
         self.visuals.append(doc)
         return name
 
+    def set_canvas(self, hex_value):
+        """Page background: warm neutral so white tiles stand out without heavy borders."""
+        page_json = self.dir / "page.json"
+        doc = json.loads(page_json.read_text(encoding="utf-8"))
+        doc["objects"] = {"background": [{"properties": {
+            "color": color(hex_value), "transparency": lit(0)}}]}
+        page_json.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+
     def write(self):
         """Replace the page's visuals folder so no stale shape survives."""
         target = self.dir / "visuals"

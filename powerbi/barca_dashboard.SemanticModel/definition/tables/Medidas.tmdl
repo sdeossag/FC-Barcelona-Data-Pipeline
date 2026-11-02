@@ -230,3 +230,11 @@ table Medidas
 	measure 'Fondo equipo' = IF ( SELECTEDVALUE ( 'warehouse vw_team_season_summary'[team_id] ) = 81, "#E8EFF8", "#FFFFFF" )
 		isHidden
 		displayFolder: Formato
+
+	measure 'Color resultado' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_matches'[result_code] ), "V", "#004D98", "D", "#A50044", "#16181D" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Color forma' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_form_last5'[result_code] ), "V", "#004D98", "D", "#A50044", "#16181D" )
+		isHidden
+		displayFolder: Formato
