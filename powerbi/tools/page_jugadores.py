@@ -1,18 +1,18 @@
-"""Builds the 'Jugadores' page: top scorers, expected goals and finishing."""
+"""Builds the 'Jugadores' page: top scorers, goals by stretch of the match and finishing."""
 from pathlib import Path
 
-from layout import G, M, W, axes, chart, data_table, header, kpi_row, span
-from pbir import (BLUE, CANVAS, INK, RIVAL, Page, col, color, container, lit, meas,
-                  projection)
+from layout import G, M, W, chart, data_table, header, kpi_row, span
+from pbir import BLUE, CANVAS, GRANATE, INK, RIVAL, Page, col, meas
 
 REPORT = Path(__file__).resolve().parent.parent / "barca_dashboard.Report" / "definition" / "pages"
 PAGE_ID = "959b262bc06b40d4adab"
 
 SCORERS = "warehouse vw_top_scorers"
-SHOTS = "warehouse vw_player_shot_quality"
+EVENTS = "warehouse vw_barca_player_events"
+INTERVALS = "warehouse vw_barca_goals_by_interval"
 
 page = Page(REPORT / PAGE_ID)
-header(page, "Jugadores", "Goleadores de la competición y calidad de finalización")
+header(page, "Jugadores", "Goleadores de la competición, goles por tramo y remate de la plantilla")
 y = kpi_row(page, [
     ("Goleador del Barça", "Goleador del Barça", INK, "hero"),
     ("Goles del goleador", "Goles del goleador", INK),
@@ -39,33 +39,25 @@ data_table(page, "scorers_table", M + bars_w + G, mid_y, W - bars_w - G, mid_h,
     styled=[(f"{SCORERS}.{c}", "Texto jugador", "Fondo jugador")
             for c in ("Jugador", "Equipo", "Goles", "Asistencias", "G+A", "Sin penalti")])
 
-# ---- Bottom row: expected goals against goals, and finishing efficiency ----
+# ---- Bottom row: when Barcelona scores, and who finishes and gets booked ---
+# Both come from the ESPN event stream of this season's matches, so they are not
+# filtered by the competition and season slicers.
 low_y = mid_y + mid_h + G
 low_h = 720 - 16 - low_y
-half = span(6)
-page.add("xg_scatter", M, low_y, half, low_h, {
-    "visualType": "scatterChart",
-    "query": {"queryState": {
-        "Category": {"projections": [projection(col(SHOTS, "Jugador"), True)]},
-        "X": {"projections": [projection(meas("xG acumulado"))]},
-        "Y": {"projections": [projection(meas("Goles reales"))]},
-    }},
-    "objects": {
-        **axes(),
-        "dataPoint": [{"properties": {"fill": color(BLUE)}}],
-        "categoryLabels": [{"properties": {"show": lit(True), "fontSize": lit(9),
-                                           "color": color(INK)}}],
-    },
-    "visualContainerObjects": container("xG contra goles · StatsBomb, Barça 4-0 Granada (2020/21)",
-                                        padding=(4, 12, 8, 8)),
-})
+half = span(5)
+chart(page, "goal_intervals", M, low_y, half, low_h,
+      "Goles por tramo del partido · temporada 2026/27 (ESPN)", "clusteredColumnChart",
+      col(INTERVALS, "Tramo"),
+      [meas("Goles a favor por tramo"), meas("Goles en contra por tramo")],
+      colors={"Goles a favor por tramo": BLUE, "Goles en contra por tramo": GRANATE},
+      legend=True, labels=True)
 
-data_table(page, "efficiency", M + half + G, low_y, W - half - G, low_h,
-           "Eficiencia de tiro por jugador", [
-    col(SHOTS, "Jugador"), col(SHOTS, "Equipo"), col(SHOTS, "Tiros"),
-    (col(SHOTS, "Goles anotados"), "Goles"), col(SHOTS, "xG"),
-    col(SHOTS, "Diferencia xG"),
-], col(SHOTS, "xG"), widths=[0.32, 0.2, 0.1, 0.1, 0.12, 0.16], row_padding=1)
+data_table(page, "player_events", M + half + G, low_y, W - half - G, low_h,
+           "Remate y disciplina del Barça · temporada 2026/27 (ESPN)", [
+    col(EVENTS, "Jugador"), col(EVENTS, "Goles"), col(EVENTS, "Asistencias"),
+    col(EVENTS, "Tiros"), col(EVENTS, "A puerta"), col(EVENTS, "% a puerta"),
+    col(EVENTS, "Amarillas"), col(EVENTS, "Rojas"),
+], col(EVENTS, "Goles"), widths=[0.26, 0.09, 0.12, 0.09, 0.1, 0.12, 0.12, 0.1], row_padding=1)
 
 page.write()
 page.set_canvas(CANVAS)

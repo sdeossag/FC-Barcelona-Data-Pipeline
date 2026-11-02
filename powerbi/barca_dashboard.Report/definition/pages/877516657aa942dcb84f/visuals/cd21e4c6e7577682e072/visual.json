@@ -23,11 +23,11 @@
                       "Entity": "Medidas"
                     }
                   },
-                  "Property": "Minuto actual"
+                  "Property": "Rival en vivo"
                 }
               },
-              "queryRef": "Medidas.Minuto actual",
-              "nativeQueryRef": "Minuto actual"
+              "queryRef": "Medidas.Rival en vivo",
+              "nativeQueryRef": "Rival en vivo"
             }
           ]
         }
@@ -106,7 +106,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Minuto'"
+                  "Value": "'Rival'"
                 }
               }
             },

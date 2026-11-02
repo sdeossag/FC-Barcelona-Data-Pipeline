@@ -1,187 +1,128 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "85b19d484377f031e081",
+  "name": "0cf5f5e686f951ab5ff0",
   "position": {
-    "x": 646,
+    "x": 24,
     "y": 450,
-    "z": 180,
+    "z": 170,
     "height": 254,
-    "width": 610,
-    "tabOrder": 180
+    "width": 506,
+    "tabOrder": 170
   },
   "visual": {
-    "visualType": "tableEx",
+    "visualType": "clusteredColumnChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
+                      "Entity": "warehouse vw_barca_goals_by_interval"
                     }
                   },
-                  "Property": "Jugador"
+                  "Property": "Tramo"
                 }
               },
-              "queryRef": "warehouse vw_player_shot_quality.Jugador",
-              "nativeQueryRef": "Jugador"
+              "queryRef": "warehouse vw_barca_goals_by_interval.Tramo",
+              "nativeQueryRef": "Tramo",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Medidas"
+                    }
+                  },
+                  "Property": "Goles a favor por tramo"
+                }
+              },
+              "queryRef": "Medidas.Goles a favor por tramo",
+              "nativeQueryRef": "Goles a favor por tramo"
             },
             {
               "field": {
-                "Column": {
+                "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
+                      "Entity": "Medidas"
                     }
                   },
-                  "Property": "Equipo"
+                  "Property": "Goles en contra por tramo"
                 }
               },
-              "queryRef": "warehouse vw_player_shot_quality.Equipo",
-              "nativeQueryRef": "Equipo"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
-                    }
-                  },
-                  "Property": "Tiros"
-                }
-              },
-              "queryRef": "warehouse vw_player_shot_quality.Tiros",
-              "nativeQueryRef": "Tiros"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
-                    }
-                  },
-                  "Property": "Goles anotados"
-                }
-              },
-              "queryRef": "warehouse vw_player_shot_quality.Goles anotados",
-              "nativeQueryRef": "Goles anotados",
-              "displayName": "Goles"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
-                    }
-                  },
-                  "Property": "xG"
-                }
-              },
-              "queryRef": "warehouse vw_player_shot_quality.xG",
-              "nativeQueryRef": "xG"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "warehouse vw_player_shot_quality"
-                    }
-                  },
-                  "Property": "Diferencia xG"
-                }
-              },
-              "queryRef": "warehouse vw_player_shot_quality.Diferencia xG",
-              "nativeQueryRef": "Diferencia xG"
+              "queryRef": "Medidas.Goles en contra por tramo",
+              "nativeQueryRef": "Goles en contra por tramo"
             }
           ]
         }
-      },
-      "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "warehouse vw_player_shot_quality"
-                  }
-                },
-                "Property": "xG"
-              }
-            },
-            "direction": "Descending"
-          }
-        ]
       }
     },
     "objects": {
-      "grid": [
+      "legend": [
         {
           "properties": {
-            "rowPadding": {
-              "expr": {
-                "Literal": {
-                  "Value": "1D"
-                }
-              }
-            },
-            "outlineColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#24365C'"
-                    }
-                  }
-                }
-              }
-            },
-            "gridHorizontalColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#24365C'"
-                    }
-                  }
-                }
-              }
-            },
-            "gridHorizontal": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "true"
                 }
               }
             },
-            "gridVertical": {
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'TopRight'"
+                }
+              }
+            },
+            "showTitle": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
               }
             },
-            "textSize": {
+            "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "10D"
+                  "Value": "9D"
+                }
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
                 }
               }
             }
           }
         }
       ],
-      "columnHeaders": [
+      "categoryAxis": [
         {
           "properties": {
-            "fontColor": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "labelColor": {
               "solid": {
                 "color": {
                   "expr": {
@@ -192,95 +133,7 @@
                 }
               }
             },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "10D"
-                }
-              }
-            },
-            "fontFamily": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Segoe UI Semibold'"
-                }
-              }
-            },
-            "backColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#131F38'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "values": [
-        {
-          "properties": {
-            "fontColorPrimary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#EEF2FA'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontColorSecondary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#EEF2FA'"
-                    }
-                  }
-                }
-              }
-            },
-            "backColorPrimary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#131F38'"
-                    }
-                  }
-                }
-              }
-            },
-            "backColorSecondary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#182847'"
-                    }
-                  }
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "10D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "total": [
-        {
-          "properties": {
-            "totals": {
+            "gridlineShow": {
               "expr": {
                 "Literal": {
                   "Value": "false"
@@ -290,89 +143,121 @@
           }
         }
       ],
-      "columnWidth": [
+      "valueAxis": [
         {
           "properties": {
-            "value": {
+            "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "181D"
+                  "Value": "9D"
+                }
+              }
+            },
+            "showAxisTitle": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8FA0C0'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridlineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#24365C'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#EEF2FA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#3D8BFF'"
+                    }
+                  }
                 }
               }
             }
           },
           "selector": {
-            "metadata": "warehouse vw_player_shot_quality.Jugador"
+            "metadata": "Medidas.Goles a favor por tramo"
           }
         },
         {
           "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "113D"
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F0527F'"
+                    }
+                  }
                 }
               }
             }
           },
           "selector": {
-            "metadata": "warehouse vw_player_shot_quality.Equipo"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "57D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "warehouse vw_player_shot_quality.Tiros"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "57D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "warehouse vw_player_shot_quality.Goles anotados"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "68D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "warehouse vw_player_shot_quality.xG"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "91D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "warehouse vw_player_shot_quality.Diferencia xG"
+            "metadata": "Medidas.Goles en contra por tramo"
           }
         }
       ]
@@ -391,7 +276,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Eficiencia de tiro por jugador'"
+                  "Value": "'Goles por tramo del partido · temporada 2026/27 (ESPN)'"
                 }
               }
             },
@@ -523,7 +408,7 @@
             "right": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "12D"
                 }
               }
             },

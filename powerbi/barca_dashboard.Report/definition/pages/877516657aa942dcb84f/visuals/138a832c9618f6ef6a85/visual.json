@@ -32,7 +32,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Eventos del streaming con Kafka y pronóstico del modelo para los próximos partidos",
+                    "value": "Eventos reales de ESPN por Kafka (partido más reciente) y pronóstico del modelo",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "10pt",

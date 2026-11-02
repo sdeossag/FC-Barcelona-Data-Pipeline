@@ -136,6 +136,44 @@ table 'warehouse vw_live_events_current'
 
 		annotation SummarizationSetBy = Automatic
 
+	column 'Asistencia'
+		dataType: string
+		lineageTag: 64a96d34-9b68-4e9e-aba0-6a3f50ad68f8
+		summarizeBy: none
+		sourceColumn: assist_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Descripción'
+		dataType: string
+		lineageTag: 9047d8ae-9b92-4d84-9b51-c97924c1bf1a
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fuente'
+		dataType: string
+		lineageTag: b9c47ebf-a432-42c3-bd40-191c68c1e9fe
+		summarizeBy: none
+		sourceColumn: source
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Liga'
+		dataType: string
+		lineageTag: 0c35a592-a8c0-4f06-a338-79db443326ff
+		summarizeBy: none
+		sourceColumn: league
+
+		annotation SummarizationSetBy = Automatic
+
+	column Detalle = IF ( NOT ISBLANK ( 'warehouse vw_live_events_current'[Asistencia] ), "Asistencia: " & 'warehouse vw_live_events_current'[Asistencia], IF ( NOT ISBLANK ( 'warehouse vw_live_events_current'[Sustituye] ), "Entra: " & 'warehouse vw_live_events_current'[Sustituye], 'warehouse vw_live_events_current'[Resultado del tiro] ) )
+		dataType: string
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'warehouse vw_live_events_current' = m
 		mode: import
 		source =

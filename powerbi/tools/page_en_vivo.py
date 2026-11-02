@@ -13,10 +13,10 @@ EVENTS = "warehouse vw_live_events_current"
 FIXTURES = "warehouse vw_barca_fixtures"
 
 page = Page(REPORT / PAGE_ID)
-# The replay is a StatsBomb match from 2020/21 and the fixtures are upcoming, so
+# The event stream shows the latest match and the fixtures are upcoming, so
 # neither follows a season slicer. Leaving the slicers off avoids implying they do.
 header(page, "En vivo y predicción",
-       "Eventos del streaming con Kafka y pronóstico del modelo para los próximos partidos",
+       "Eventos reales de ESPN por Kafka (partido más reciente) y pronóstico del modelo",
        slicers=False)
 
 half = span(6)
@@ -25,22 +25,22 @@ right_x = M + half + G
 # ---- Left: streaming layer -------------------------------------------------
 y = kpi_row(page, [
     ("Marcador", "Marcador en vivo", INK, "hero"),
-    ("Minuto", "Minuto actual", INK),
+    ("Rival", "Rival en vivo", INK),
     ("Eventos", "Eventos procesados", INK),
     ("Latencia (ms)", "Latencia media (ms)", INK),
 ], x0=M, total_w=half, prefix="live")
 
 top_h = 170
-chart(page, "live_shots", M, y + G, half, top_h, "Tiros y goles por equipo (replay StatsBomb)",
+chart(page, "live_shots", M, y + G, half, top_h, "Tiros y goles por equipo · partido más reciente (ESPN)",
       "clusteredColumnChart", col(SCORE, "Equipo"),
       [meas("Tiros en vivo"), meas("Goles en vivo")],
       colors={"Tiros en vivo": BLUE, "Goles en vivo": GRANATE}, legend=True, labels=True)
 
 ev_y = y + G + top_h + G
-data_table(page, "live_events", M, ev_y, half, 720 - 16 - ev_y, "Eventos recibidos", [
+data_table(page, "live_events", M, ev_y, half, 720 - 16 - ev_y, "Eventos recibidos por Kafka", [
     col(EVENTS, "Minuto"), col(EVENTS, "Evento"), col(EVENTS, "Jugador"),
-    col(EVENTS, "Equipo"), col(EVENTS, "xG"),
-], col(EVENTS, "Minuto"), widths=[0.1, 0.22, 0.34, 0.2, 0.1], row_padding=1)
+    col(EVENTS, "Equipo"), col(EVENTS, "Detalle"),
+], col(EVENTS, "Minuto"), widths=[0.08, 0.2, 0.25, 0.14, 0.33], row_padding=1)
 
 # ---- Right: prediction layer ----------------------------------------------
 kpi_row(page, [

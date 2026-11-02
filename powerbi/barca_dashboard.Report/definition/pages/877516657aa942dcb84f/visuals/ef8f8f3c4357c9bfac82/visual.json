@@ -79,11 +79,11 @@
                       "Entity": "warehouse vw_live_events_current"
                     }
                   },
-                  "Property": "xG"
+                  "Property": "Detalle"
                 }
               },
-              "queryRef": "warehouse vw_live_events_current.xG",
-              "nativeQueryRef": "xG"
+              "queryRef": "warehouse vw_live_events_current.Detalle",
+              "nativeQueryRef": "Detalle"
             }
           ]
         }
@@ -281,7 +281,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "57D"
+                  "Value": "45D"
                 }
               }
             }
@@ -295,7 +295,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "125D"
+                  "Value": "113D"
                 }
               }
             }
@@ -309,7 +309,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "192D"
+                  "Value": "142D"
                 }
               }
             }
@@ -323,7 +323,7 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "113D"
+                  "Value": "79D"
                 }
               }
             }
@@ -337,13 +337,13 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "57D"
+                  "Value": "187D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "warehouse vw_live_events_current.xG"
+            "metadata": "warehouse vw_live_events_current.Detalle"
           }
         }
       ]
@@ -362,7 +362,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Eventos recibidos'"
+                  "Value": "'Eventos recibidos por Kafka'"
                 }
               }
             },

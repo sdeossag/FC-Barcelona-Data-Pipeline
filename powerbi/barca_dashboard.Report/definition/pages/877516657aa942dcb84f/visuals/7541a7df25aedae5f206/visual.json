@@ -276,7 +276,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Tiros y goles por equipo (replay StatsBomb)'"
+                  "Value": "'Tiros y goles por equipo · partido más reciente (ESPN)'"
                 }
               }
             },

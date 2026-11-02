@@ -273,13 +273,7 @@ table Medidas
 	measure 'Máximo goleador' = VAR t = TOPN ( 1, 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Goles], DESC ) RETURN COALESCE ( MAXX ( t, 'warehouse vw_top_scorers'[Jugador] ) & " (" & MAXX ( t, 'warehouse vw_top_scorers'[Goles] ) & ")", "Sin datos" )
 		displayFolder: Jugadores
 
-	measure 'xG acumulado' = SUM ( 'warehouse vw_player_shot_quality'[xG] )
-		formatString: 0.00
-		displayFolder: Jugadores
 
-	measure 'Goles reales' = SUM ( 'warehouse vw_player_shot_quality'[Goles anotados] )
-		formatString: #,0
-		displayFolder: Jugadores
 
 	measure 'Goles Barça en vivo' = COALESCE ( CALCULATE ( SUM ( 'warehouse vw_live_current_score'[Goles] ), 'warehouse vw_live_current_score'[Barça] = TRUE () ), 0 )
 		formatString: #,0
@@ -339,5 +333,16 @@ table Medidas
 		displayFolder: Jugadores
 
 	measure 'Goles (resto)' = CALCULATE ( SUM ( 'warehouse vw_top_scorers'[Goles] ), 'warehouse vw_top_scorers'[Barça] = FALSE () )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Rival en vivo' = COALESCE ( MAXX ( FILTER ( 'warehouse vw_live_current_score', 'warehouse vw_live_current_score'[Barça] = FALSE () ), 'warehouse vw_live_current_score'[Equipo] ), "–" )
+		displayFolder: En vivo
+
+	measure 'Goles a favor por tramo' = SUM ( 'warehouse vw_barca_goals_by_interval'[GF] )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Goles en contra por tramo' = SUM ( 'warehouse vw_barca_goals_by_interval'[GC] )
 		formatString: #,0
 		displayFolder: Jugadores
