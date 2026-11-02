@@ -117,7 +117,7 @@
             "rowPadding": {
               "expr": {
                 "Literal": {
-                  "Value": "2D"
+                  "Value": "0D"
                 }
               }
             },
@@ -585,6 +585,17 @@
               "expr": {
                 "Literal": {
                   "Value": "'left'"
+                }
+              }
+            },
+            "background": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
                 }
               }
             }

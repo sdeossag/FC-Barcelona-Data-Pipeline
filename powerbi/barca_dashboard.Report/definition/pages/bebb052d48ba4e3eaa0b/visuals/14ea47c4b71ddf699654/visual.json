@@ -383,6 +383,17 @@
                   "Value": "'left'"
                 }
               }
+            },
+            "background": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
             }
           }
         }

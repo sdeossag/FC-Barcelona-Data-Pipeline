@@ -187,6 +187,13 @@ table 'warehouse vw_barca_fixtures'
 
 		annotation SummarizationSetBy = Automatic
 
+	column 'Partido corto' = FORMAT ( 'warehouse vw_barca_fixtures'[Fecha], "dd/MM" ) & " · " & 'warehouse vw_barca_fixtures'[Rival]
+		dataType: string
+		summarizeBy: none
+		sortByColumn: Fecha
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'warehouse vw_barca_fixtures' = m
 		mode: import
 		source =

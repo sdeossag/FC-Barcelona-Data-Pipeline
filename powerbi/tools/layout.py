@@ -27,7 +27,7 @@ def measure_color(name):
         "Expression": {"SourceRef": {"Entity": "Medidas"}}, "Property": name}}}}}
 
 
-def header(page, title, subtitle):
+def header(page, title, subtitle, slicers=True):
     """Title on the left; competition and season slicers on the right."""
     runs = [
         {"textRuns": [{"value": title, "textStyle": {
@@ -73,21 +73,23 @@ def header(page, title, subtitle):
         },
             sync_group={"groupName": group, "fieldChanges": True, "filterChanges": True})
 
+    if not slicers:
+        return
     slicer("slicer_comp", 1280 - M - 200 - G - 200, "Competición", "'La Liga'", "competicion")
     slicer("slicer_season", 1280 - M - 200, "Temporada", "'2025/26'", "temporada")
 
 
-def kpi_row(page, items, y=HEADER_BOTTOM, h=88):
+def kpi_row(page, items, y=HEADER_BOTTOM, h=88, x0=M, total_w=W, prefix="kpi"):
     """Equal tiles. items: (label, measure, value colour[, 'hero']).
 
     A hero tile is solid blue with white text: one per page, the number that
     answers the page's main question.
     """
-    width = round((W - (len(items) - 1) * G) / len(items))
+    width = round((total_w - (len(items) - 1) * G) / len(items))
     for i, item in enumerate(items):
         label, measure, value_color = item[:3]
         hero = len(item) > 3
-        page.add(f"kpi{i}", M + i * (width + G), y, width, h, {
+        page.add(f"{prefix}{i}", x0 + i * (width + G), y, width, h, {
             "visualType": "card",
             "query": {"queryState": {"Values": {"projections": [projection(meas(measure))]}}},
             "objects": {
@@ -104,7 +106,7 @@ def kpi_row(page, items, y=HEADER_BOTTOM, h=88):
 
 
 def data_table(page, key, x, y, w, h, title, fields, sort_field, direction="Descending",
-               styled=(), widths=None):
+               styled=(), widths=None, row_padding=2):
     """A compact table.
 
     fields   fields to show; an item may be (field, display name).
@@ -122,7 +124,7 @@ def data_table(page, key, x, y, w, h, title, fields, sort_field, direction="Desc
         values.append({"properties": props, "selector": {
             "data": [{"dataViewWildcard": {"matchingOption": 1}}], "metadata": metadata}})
     objects = {
-        "grid": [{"properties": {"rowPadding": lit(2), "outlineColor": color("#EEEBE3"),
+        "grid": [{"properties": {"rowPadding": lit(row_padding), "outlineColor": color("#EEEBE3"),
                                  "gridHorizontal": lit(True), "gridVertical": lit(False),
                                  "textSize": lit(10)}}],
         "columnHeaders": [{"properties": {"fontColor": color(MUTED), "fontSize": lit(10),
@@ -147,3 +149,37 @@ def data_table(page, key, x, y, w, h, title, fields, sort_field, direction="Desc
         "objects": objects,
         "visualContainerObjects": container(title, padding=(4, 8, 8, 8)),
     })
+
+
+def chart(page, key, x, y, w, h, title, vtype, category, values, colors=None,
+          filters=None, legend=False, labels=False, hide_value_axis=False,
+          value_end=None, sort=None, extra=None):
+    """A bar/column chart with series coloured by measure.
+
+    colors maps a measure name to a hex colour. `sort` is (field, direction).
+    """
+    objects = {
+        "legend": [{"properties": {"show": lit(legend), "position": lit("TopRight"),
+                                   "showTitle": lit(False), "fontSize": lit(9)}}],
+        "categoryAxis": [{"properties": {"fontSize": lit(10)}}],
+        "valueAxis": [{"properties": {"fontSize": lit(9), "showAxisTitle": lit(False),
+                                      **({"show": lit(False)} if hide_value_axis else {}),
+                                      **({"end": lit(value_end), "start": lit(0)}
+                                         if value_end is not None else {})}}],
+        "labels": [{"properties": {"show": lit(labels), "fontSize": lit(9)}}],
+    }
+    if colors:
+        objects["dataPoint"] = [
+            {"properties": {"fill": color(hex_value)}, "selector": {"metadata": f"Medidas.{name}"}}
+            for name, hex_value in colors.items()]
+    objects.update(extra or {})
+    query = {"queryState": {
+        "Category": {"projections": [projection(category, True)]},
+        "Y": {"projections": [projection(v) for v in values]},
+    }}
+    if sort:
+        query["sortDefinition"] = {"sort": [{"field": sort[0], "direction": sort[1]}]}
+    return page.add(key, x, y, w, h, {
+        "visualType": vtype, "query": query, "objects": objects,
+        "visualContainerObjects": container(title, padding=(4, 12, 8, 8)),
+    }, filters=filters)

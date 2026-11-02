@@ -88,6 +88,8 @@ def container(title=None, background=True, padding=None, fill=CARD, title_color=
         "title": [{"properties": {"show": lit(bool(title)), **({
             "text": lit(title), "fontColor": color(title_color), "fontSize": lit(11),
             "fontFamily": lit("Segoe UI Semibold"), "alignment": lit("left"),
+            # The theme paints titles white, which hides a white title on a hero tile.
+            "background": color(fill),
         } if title else {})}}],
         "background": [{"properties": {"show": lit(background), "color": color(fill),
                                        "transparency": lit(0)}}],

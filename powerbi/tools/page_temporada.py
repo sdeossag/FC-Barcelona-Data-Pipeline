@@ -81,7 +81,7 @@ data_table(page, "standings", M + race_w + G, mid_y, W - race_w - G, 720 - 16 - 
            "Tabla de posiciones", [
     (meas("Posición"), "#"), col(SUMMARY, "Equipo"), (meas("PJ tabla"), "PJ"),
     (meas("DG tabla"), "DG"), (meas("Puntos tabla"), "Pts"),
-], meas("Posición"), "Ascending", widths=[0.09, 0.5, 0.11, 0.15, 0.15],
+], meas("Posición"), "Ascending", widths=[0.09, 0.5, 0.11, 0.15, 0.15], row_padding=0,
     # Highlight Barcelona's whole row, not just the name cell.
     styled=[(ref, "Color equipo", "Fondo equipo") for ref in (
         "Medidas.Posición", f"{SUMMARY}.Equipo", "Medidas.PJ tabla",

@@ -246,3 +246,98 @@ table Medidas
 	measure 'Color forma' = SWITCH ( SELECTEDVALUE ( 'warehouse vw_barca_form_last5'[result_code] ), "V", "#004D98", "D", "#A50044", "#16181D" )
 		isHidden
 		displayFolder: Formato
+
+	measure 'Color jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#004D98", "#B4B2A9" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Texto jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#FFFFFF", "#16181D" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Fondo jugador' = IF ( SELECTEDVALUE ( 'warehouse vw_top_scorers'[Barça] ), "#004D98", "#FFFFFF" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Goleador del Barça' = VAR t = TOPN ( 1, FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles], DESC ) RETURN COALESCE ( MAXX ( t, 'warehouse vw_top_scorers'[Jugador] ), "Sin datos" )
+		displayFolder: Jugadores
+
+	measure 'Goles del goleador' = COALESCE ( MAXX ( FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles] ), 0 )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Goles del Barça en el top 10' = COALESCE ( SUMX ( FILTER ( 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Barça] ), 'warehouse vw_top_scorers'[Goles] ), 0 )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Máximo goleador' = VAR t = TOPN ( 1, 'warehouse vw_top_scorers', 'warehouse vw_top_scorers'[Goles], DESC ) RETURN COALESCE ( MAXX ( t, 'warehouse vw_top_scorers'[Jugador] ) & " (" & MAXX ( t, 'warehouse vw_top_scorers'[Goles] ) & ")", "Sin datos" )
+		displayFolder: Jugadores
+
+	measure 'xG acumulado' = SUM ( 'warehouse vw_player_shot_quality'[xG] )
+		formatString: 0.00
+		displayFolder: Jugadores
+
+	measure 'Goles reales' = SUM ( 'warehouse vw_player_shot_quality'[Goles anotados] )
+		formatString: #,0
+		displayFolder: Jugadores
+
+	measure 'Goles Barça en vivo' = COALESCE ( CALCULATE ( SUM ( 'warehouse vw_live_current_score'[Goles] ), 'warehouse vw_live_current_score'[Barça] = TRUE () ), 0 )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Goles rival en vivo' = COALESCE ( CALCULATE ( SUM ( 'warehouse vw_live_current_score'[Goles] ), 'warehouse vw_live_current_score'[Barça] = FALSE () ), 0 )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Marcador en vivo' = [Goles Barça en vivo] & " - " & [Goles rival en vivo]
+		displayFolder: En vivo
+
+	measure 'Tiros en vivo' = SUM ( 'warehouse vw_live_current_score'[Tiros] )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Goles en vivo' = SUM ( 'warehouse vw_live_current_score'[Goles] )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Eventos procesados' = COUNTROWS ( 'warehouse vw_live_events_current' )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Latencia media (ms)' = AVERAGE ( 'warehouse vw_live_events_current'[Latencia (ms)] )
+		formatString: #,0
+		displayFolder: En vivo
+
+	measure 'Minuto actual' = MAX ( 'warehouse vw_live_events_current'[Minuto] )
+		formatString: 0
+		displayFolder: En vivo
+
+	measure 'Prob. Barça gana' = SUMX ( 'warehouse vw_barca_fixtures', IF ( 'warehouse vw_barca_fixtures'[Barça local], 'warehouse vw_barca_fixtures'[Prob. local], 'warehouse vw_barca_fixtures'[Prob. visita] ) )
+		formatString: 0.0%
+		displayFolder: Predicción
+
+	measure 'Prob. empate' = SUM ( 'warehouse vw_barca_fixtures'[Prob. empate] )
+		formatString: 0.0%
+		displayFolder: Predicción
+
+	measure 'Prob. rival gana' = SUMX ( 'warehouse vw_barca_fixtures', IF ( 'warehouse vw_barca_fixtures'[Barça local], 'warehouse vw_barca_fixtures'[Prob. visita], 'warehouse vw_barca_fixtures'[Prob. local] ) )
+		formatString: 0.0%
+		displayFolder: Predicción
+
+	measure 'Controles texto' = [Controles superados] & " / " & [Controles totales]
+		displayFolder: Calidad
+
+	measure 'Tablas frescas texto' = COALESCE ( [Tablas frescas], 0 ) & " / " & [Tablas monitorizadas]
+		displayFolder: Calidad
+
+	measure 'Color estado' = IF ( SELECTEDVALUE ( 'warehouse vw_pipeline_health'[Fresca] ), "#004D98", "#A50044" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Color control' = IF ( SELECTEDVALUE ( 'warehouse vw_quality_results_latest'[Superado] ), "#004D98", "#A50044" )
+		isHidden
+		displayFolder: Formato
+
+	measure 'Goles jugador' = SUM ( 'warehouse vw_top_scorers'[Goles] )
+		formatString: #,0
+		displayFolder: Jugadores
