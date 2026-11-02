@@ -250,51 +250,13 @@ GROUP BY competition, season, stage, matchday;
 
 
 -- ------------------------------------------------------------
--- PAGE 2 - Shot quality: expected goals against real outcomes
+-- RETIRED - xG views built on the 2020/21 StatsBomb replay
 -- ------------------------------------------------------------
--- This replaces the possession-versus-goals idea. Possession is not available:
--- football-data.org sells it as a paid statistics add-on and the free tier
--- never returns it. Expected goals comes from the StatsBomb events already
--- flowing through the streaming layer, so it is real data the project owns.
--- Dropped first because CREATE OR REPLACE VIEW can only append columns at the
--- end of the list: it cannot insert one, and reordering reads to PostgreSQL as
--- renaming every column that follows. The dependent aggregate is dropped too,
--- so this file can be re-applied to an existing warehouse.
+-- The streaming layer now publishes current ESPN events, which carry no expected
+-- goals, so these views have nothing to read. They are dropped rather than left
+-- to return stale 2020/21 numbers beside current ones.
 DROP VIEW IF EXISTS warehouse.vw_player_shot_quality;
 DROP VIEW IF EXISTS warehouse.vw_shot_quality;
-
-CREATE VIEW warehouse.vw_shot_quality AS
-SELECT
-    -- Provenance, carried explicitly. This view has no comp_season_key and is
-    -- deliberately left out of the star schema: it describes StatsBomb events
-    -- from a season the batch layer does not cover, and the two sources do not
-    -- even share an id space (football-data.org ids run in the hundreds of
-    -- thousands, StatsBomb's in the millions). Joining them is not possible,
-    -- and a season slicer must not appear to filter it.
-    'StatsBomb 2020/21' AS data_source,
-    match_id,
-    team_name,
-    player_name,
-    minute,
-    (detail->>'expected_goals')::numeric AS expected_goals,
-    detail->>'body_part'                 AS body_part,
-    detail->>'play_pattern'              AS play_pattern,
-
-    -- Two shapes of the same fact, because they do different jobs. The boolean
-    -- is for filtering and for splitting a legend; the integer is what a chart
-    -- axis can actually sum. Power BI refuses to aggregate a boolean, so a
-    -- scatter plotting goals against expected goals needs the numeric one.
-    event_type = 'GOAL'                  AS scored,
-    CASE WHEN event_type = 'GOAL' THEN 1 ELSE 0 END AS goals_scored,
-
-    -- Positive means the shot beat its expected value: a goal from a chance
-    -- worth 0.05 xG contributes +0.95. Summed per player it reads directly as
-    -- over- or under-performance.
-    CASE WHEN event_type = 'GOAL' THEN 1 ELSE 0 END - (detail->>'expected_goals')::numeric
-        AS xg_difference
-FROM warehouse.live_events
-WHERE event_type IN ('GOAL', 'SHOT')
-  AND detail ? 'expected_goals';
 
 
 -- ------------------------------------------------------------
@@ -362,7 +324,12 @@ SELECT
         WHEN 'OFFSIDE'       THEN 'Fuera de juego'
         WHEN 'CORNER'        THEN 'Córner'
         ELSE initcap(replace(event_type, '_', ' '))
-    END AS event_label
+    END AS event_label,
+    -- Appended last: CREATE OR REPLACE VIEW can only add columns at the end.
+    detail->>'assist_name' AS assist_name,
+    detail->>'text'        AS description,
+    detail->>'source'      AS source,
+    detail->>'league'      AS league
 FROM warehouse.live_events;
 
 
@@ -373,7 +340,8 @@ CREATE OR REPLACE VIEW warehouse.vw_live_score AS
 SELECT
     match_id,
     team_name,
-    COUNT(*) FILTER (WHERE event_type = 'GOAL')         AS goals,
+    -- An own goal is recorded against the team it benefits, so it counts here.
+    COUNT(*) FILTER (WHERE event_type IN ('GOAL', 'OWN_GOAL')) AS goals,
     COUNT(*) FILTER (WHERE event_type = 'SHOT')         AS shots,
     COUNT(*) FILTER (WHERE event_type = 'YELLOW_CARD')  AS yellow_cards,
     COUNT(*) FILTER (WHERE event_type = 'RED_CARD')     AS red_cards,
@@ -581,25 +549,84 @@ GROUP BY comp_season_key, competition, season, is_home;
 
 
 -- ------------------------------------------------------------
--- Shot quality per player
+-- Barcelona players: finishing and discipline from the event stream
 -- ------------------------------------------------------------
--- vw_shot_quality keeps one row per shot. This aggregates to the player grain
--- the scatter and the efficiency table need. xG is summed, not averaged: a
--- player with twenty shots at 0.1 xG each has generated two expected goals.
-CREATE OR REPLACE VIEW warehouse.vw_player_shot_quality AS
+-- Built from every Barcelona match that has been streamed. A shot is a recorded
+-- shot or a goal; ESPN lists goals separately from shots, so counting only the
+-- shot rows would undercount a striker who scores a lot. Assists come from the
+-- detail of each goal and are matched back to the player by name.
+CREATE OR REPLACE VIEW warehouse.vw_barca_player_events AS
+WITH actions AS (
+    SELECT
+        player_name,
+        COUNT(*) FILTER (WHERE event_type = 'GOAL')                    AS goals,
+        COUNT(*) FILTER (WHERE event_type IN ('GOAL', 'SHOT'))         AS shots,
+        COUNT(*) FILTER (WHERE event_type = 'GOAL'
+                            OR (event_type = 'SHOT' AND detail->>'outcome' = 'On target'))
+                                                                       AS shots_on_target,
+        COUNT(*) FILTER (WHERE event_type = 'YELLOW_CARD')             AS yellow_cards,
+        COUNT(*) FILTER (WHERE event_type = 'RED_CARD')                AS red_cards,
+        COUNT(DISTINCT match_id)                                       AS matches_with_events
+    FROM warehouse.live_events
+    WHERE team_name = 'Barcelona'
+      AND player_name IS NOT NULL
+      AND event_type IN ('GOAL', 'SHOT', 'YELLOW_CARD', 'RED_CARD')
+    GROUP BY player_name
+),
+assists AS (
+    SELECT detail->>'assist_name' AS player_name, COUNT(*) AS assists
+    FROM warehouse.live_events
+    WHERE team_name = 'Barcelona' AND event_type = 'GOAL' AND detail ? 'assist_name'
+    GROUP BY detail->>'assist_name'
+)
 SELECT
-    player_name,
-    team_name,
-    COUNT(*)                       AS shots,
-    COUNT(*) FILTER (WHERE scored) AS goals,
-    SUM(expected_goals)            AS expected_goals,
-    SUM(goals_scored)              AS goals_scored,
-    SUM(xg_difference)             AS xg_difference,
-    ROUND(SUM(goals_scored)::numeric / NULLIF(SUM(expected_goals), 0), 3) AS conversion_ratio,
-    ROUND(SUM(expected_goals)::numeric / NULLIF(COUNT(*), 0), 3)         AS xg_per_shot
-FROM warehouse.vw_shot_quality
-WHERE player_name IS NOT NULL
-GROUP BY player_name, team_name;
+    COALESCE(a.player_name, s.player_name)           AS player_name,
+    COALESCE(a.goals, 0)                             AS goals,
+    COALESCE(s.assists, 0)                           AS assists,
+    COALESCE(a.shots, 0)                             AS shots,
+    COALESCE(a.shots_on_target, 0)                   AS shots_on_target,
+    ROUND(a.shots_on_target::numeric / NULLIF(a.shots, 0), 3) AS on_target_rate,
+    ROUND(a.goals::numeric / NULLIF(a.shots, 0), 3)  AS conversion_rate,
+    COALESCE(a.yellow_cards, 0)                      AS yellow_cards,
+    COALESCE(a.red_cards, 0)                         AS red_cards
+FROM actions a
+FULL JOIN assists s ON s.player_name = a.player_name;
+
+
+-- ------------------------------------------------------------
+-- Goals by stretch of the match
+-- ------------------------------------------------------------
+-- When Barcelona scores and concedes, in fifteen-minute stretches. The match
+-- clock restarts at the second half, so the stretch depends on the period as
+-- well as the minute: stoppage time stays with the half it belongs to.
+CREATE OR REPLACE VIEW warehouse.vw_barca_goals_by_interval AS
+WITH goals AS (
+    SELECT
+        team_name = 'Barcelona' AS scored_by_barca,
+        CASE
+            WHEN period = 1 AND minute < 15 THEN 1
+            WHEN period = 1 AND minute < 30 THEN 2
+            WHEN period = 1                 THEN 3
+            WHEN period = 2 AND minute < 60 THEN 4
+            WHEN period = 2 AND minute < 75 THEN 5
+            WHEN period = 2                 THEN 6
+            ELSE 7
+        END AS interval_order
+    FROM warehouse.live_events
+    WHERE event_type IN ('GOAL', 'OWN_GOAL')
+      AND match_id IN (SELECT match_id FROM warehouse.live_events WHERE team_name = 'Barcelona')
+)
+SELECT
+    interval_order,
+    CASE interval_order
+        WHEN 1 THEN '0-15'   WHEN 2 THEN '16-30'  WHEN 3 THEN '31-45+'
+        WHEN 4 THEN '46-60'  WHEN 5 THEN '61-75'  WHEN 6 THEN '76-90+'
+        ELSE 'Prórroga'
+    END AS match_interval,
+    COUNT(*) FILTER (WHERE scored_by_barca)     AS goals_for,
+    COUNT(*) FILTER (WHERE NOT scored_by_barca) AS goals_against
+FROM goals
+GROUP BY interval_order;
 
 
 -- ------------------------------------------------------------
@@ -720,6 +747,7 @@ SELECT
         WHEN 'matches_finished_not_in_future'      THEN 'Sin finalizados en el futuro'
         WHEN 'matches_status_recognised'           THEN 'Estados reconocidos'
         WHEN 'scorers_penalties_within_goals'      THEN 'Penaltis dentro de los goles'
+        WHEN 'live_events_goals_match_final_scores' THEN 'Goles del stream = marcador final'
         WHEN 'standings_played_within_season'      THEN 'Partidos dentro de la temporada'
         ELSE initcap(replace(q.check_name, '_', ' '))
     END AS check_label,
@@ -735,6 +763,7 @@ SELECT
         WHEN 'matches_finished_not_in_future'      THEN 'Un partido finalizado no puede tener fecha futura'
         WHEN 'matches_status_recognised'           THEN 'Cada estado debe ser uno de los que documenta la API'
         WHEN 'scorers_penalties_within_goals'      THEN 'Un goleador no puede tener más penaltis que goles'
+        WHEN 'live_events_goals_match_final_scores' THEN 'Los goles de los eventos deben igualar el marcador final del partido'
         ELSE q.expectation
     END AS expectation_es,
     CASE WHEN q.passed THEN 'Superado' ELSE 'Atención' END AS status_label
