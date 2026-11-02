@@ -19,12 +19,18 @@ def unquote(name):
 
 
 known = {}
+duplicates = []
 for tmdl in MODEL.glob("*.tmdl"):
     text = tmdl.read_text(encoding="utf-8")
     table = unquote(re.search(r"^table (.+)$", text, re.M).group(1))
-    names = set()
+    names, seen = set(), set()
     for m in re.finditer(r"^\t(?:column|measure) ('(?:[^']|'')*'|[^\s=]+)", text, re.M):
-        names.add(unquote(m.group(1)))
+        name = unquote(m.group(1))
+        names.add(name)
+        if name in seen:
+            print(f"DUPLICATE  {table}[{name}] is declared twice; Power BI refuses to open the project")
+            duplicates.append(name)
+        seen.add(name)
     known[table] = names
 
 missing = set()
@@ -56,4 +62,4 @@ for path in PAGES.rglob("visual.json"):
 for where, entity, prop in sorted(missing):
     print(f"MISSING  page {where}: {entity}[{prop}]")
 print("all fields resolve" if not missing else f"{len(missing)} unresolved reference(s)")
-sys.exit(1 if missing else 0)
+sys.exit(1 if (missing or duplicates) else 0)

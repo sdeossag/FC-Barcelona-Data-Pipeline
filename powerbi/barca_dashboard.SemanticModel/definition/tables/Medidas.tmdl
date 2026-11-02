@@ -304,14 +304,6 @@ table Medidas
 		formatString: #,0
 		displayFolder: En vivo
 
-	measure 'Latencia media (ms)' = AVERAGE ( 'warehouse vw_live_events_current'[Latencia (ms)] )
-		formatString: #,0
-		displayFolder: En vivo
-
-	measure 'Minuto actual' = MAX ( 'warehouse vw_live_events_current'[Minuto] )
-		formatString: 0
-		displayFolder: En vivo
-
 	measure 'Prob. Barça gana' = SUMX ( 'warehouse vw_barca_fixtures', IF ( 'warehouse vw_barca_fixtures'[Barça local], 'warehouse vw_barca_fixtures'[Prob. local], 'warehouse vw_barca_fixtures'[Prob. visita] ) )
 		formatString: 0.0%
 		displayFolder: Predicción
